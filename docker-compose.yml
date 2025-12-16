@@ -1,0 +1,30 @@
+services:
+    backend_pos:
+        container_name: node_pos
+        build:
+            context: .
+            target: development
+        ports:
+            - '3000:3000'
+        env_file:
+            - .env.development
+
+        depends_on:
+            - mongo_pos
+        volumes:
+            - ./:/app
+            - /app/node_modules
+
+    mongo_pos:
+        container_name: mongo_pos
+        image: mongo:7
+        ports:
+            - '27018:27017'
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+            - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+        volumes:
+            - pos_mongo_data:/data/db
+
+volumes:
+    pos_mongo_data:

@@ -1,16 +1,22 @@
 {
-  "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist",
     "rootDir": "./src",
-    "module": "Node16",
+    "outDir": "./dist",
+    "module": "NodeNext",
+    "moduleResolution": "nodeNext",
+    "target": "ES2022",
+    "lib" : ["ES2022"],
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleDetection": "force",
     "isolatedModules": true,
+    "strict": true,
+    "declaration": true,
+    "sourceMap": true,
     "skipLibCheck": true,
-    "strict": true
-
-    //include type checking if you want
+    "moduleDetection": "force",
+    "noImplicitAny": false,
+    "incremental": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
