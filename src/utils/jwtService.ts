@@ -1,6 +1,6 @@
 import { type JWTPayload, SignJWT, jwtVerify } from 'jose'
 import dotenv from 'dotenv'
-import { tokenBlacklist } from './tokenBlackList.js'
+import { redisClient } from '../config/redisConnection.js'
 dotenv.config()
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET)
@@ -35,8 +35,8 @@ export async function signIn(
 
 export async function verifyToken(token: string) {
     try {
-        if (tokenBlacklist.has(token)) {
-            throw new Error('Token is blacklisted')
+        if ((await redisClient.get(`session:${token}`)) === null) {
+            throw new Error('Token is invalid or has expired')
         }
 
         const { payload } = await jwtVerify<IClaims>(token, secret, {

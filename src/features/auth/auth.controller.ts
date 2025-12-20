@@ -10,7 +10,7 @@ export const registerUser =
         try {
             const data = RegisterSchemaValidation.parse(req.body)
             const { name, email, phone, password } = data
-            const result = await authService.registerUser(
+            const result = await authService.register(
                 name,
                 email,
                 phone,
@@ -27,7 +27,7 @@ export const loginUser =
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { email, password } = req.body
-            const result = await authService.loginUser(email, password)
+            const result = await authService.login(email, password)
             res.status(200).json({ result })
         } catch (err) {
             next(err)
@@ -50,7 +50,7 @@ export const logoutUser =
     (authService: IAuthService) =>
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         const token = req.headers.authorization?.split(' ')[1] || ''
-        const result = await authService.logoutUser(token)
+        const result = await authService.logout(token)
         if (!result) {
             logger.error('Logout user failed')
             return next(new Error('Logout failed'))

@@ -1,4 +1,3 @@
-import bcrypt from 'bcryptjs'
 import {
     ConflictError,
     NotFoundError,
@@ -10,12 +9,13 @@ import { IUser } from './interfaces/IUserProps.interface.js'
 import { signIn } from '../../utils/jwtService.js'
 import { type LoginResponseType } from './types/LoginResponseType.type.js'
 import { comparePassword } from '../../utils/password.js'
-import { tokenBlacklist } from '../../utils/tokenBlackList.js'
+import { redisClient } from '../../config/redisConnection.js'
+import { logger } from '../../middlewares/logHandler.js'
 
 export class AuthService implements IAuthService {
     constructor(private readonly authRepository: IAuthRepository) {}
 
-    async registerUser(
+    async register(
         name: string,
         email: string,
         phone: string,
@@ -38,10 +38,7 @@ export class AuthService implements IAuthService {
         )
     }
 
-    async loginUser(
-        email: string,
-        password: string
-    ): Promise<LoginResponseType> {
+    async login(email: string, password: string): Promise<LoginResponseType> {
         const user: IUser | null = await this.authRepository.findByEmail(email)
         if (!user) {
             throw new NotFoundError(
@@ -60,7 +57,10 @@ export class AuthService implements IAuthService {
         }
 
         const token = await signIn(payload)
-
+        await redisClient.set(`session:${token}`, String(user._id), {
+            EX: 3600,
+        }) // Set token with 1 hour expiration
+        logger.info(await redisClient.get(`session:${token}`))
         return {
             success: true,
             status: 200,
@@ -73,12 +73,9 @@ export class AuthService implements IAuthService {
         }
     }
 
-    async logoutUser(token: string): Promise<boolean> {
+    async logout(token: string): Promise<boolean> {
         //validation check for user existence
-        if (!token) {
-            throw new UnauthorizedError('Invalid token')
-        }
-        tokenBlacklist.add(token)
+        await redisClient.del(`session:${token}`)
         return true
     }
 }
