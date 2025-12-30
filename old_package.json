@@ -4,9 +4,9 @@
     "type": "module",
     "main": "index.js",
     "scripts": {
-        "test": "vitest --config ./vitest.config.ts",
-        "test:watch": "npx vitest",
-        "test:coverage": "npx vitest run --coverage",
+        "test": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
+        "test:watch": "jest --watchAll",
+        "test:coverage": "jest --coverage",
         "test:clear": "rm -rf coverage || true",
         "lint": "eslint",
         "build": "tsc --watch",

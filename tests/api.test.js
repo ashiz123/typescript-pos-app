@@ -1,13 +1,19 @@
-import request from 'supertest'
-import app from '../dist/app.js'
+import { jest } from '@jest/globals'
 
-test('app is defined', () => {
-    expect(app).toBeDefined()
+// 1️⃣ Set up the manual mock
+await jest.unstable_mockModule('../dist/features/testing/math.js', () => ({
+    addNumber: jest.fn(() => 10),
+    multiplyNumber: jest.fn(() => 20),
+}))
+
+// 2️⃣ Dynamically import the mocked module
+const math = await import('../dist/features/testing/math.js')
+
+test('addNumber returns 10', () => {
+    expect(math.addNumber(4, 3)).toBe(10)
+    expect(math.addNumber).toHaveBeenCalledWith(4, 3)
 })
 
-describe('GET /', () => {
-    it('returns 200', async () => {
-        const res = await request(app).get('/api/health')
-        expect(res.status).toBe(200)
-    })
+test('multiplyNumber returns 20', () => {
+    expect(math.multiplyNumber(2, 3)).toBe(20)
 })

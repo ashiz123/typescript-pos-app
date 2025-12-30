@@ -1,48 +1,48 @@
-import { BaseError } from './baseError.js'
+import { HttpBaseError } from './httpBaseError.js'
 
-export class BadRequestError extends BaseError {
+export class BadRequestError extends HttpBaseError {
     constructor(message = 'Bad Request', location = 'unknown') {
         super(message, location, 400, true)
         this.name = 'BadRequestError'
     }
 }
 
-export class NotFoundError extends BaseError {
+export class NotFoundError extends HttpBaseError {
     constructor(message = 'Not Found', location = 'unknown') {
         super(message, location, 404, true)
         this.name = 'NotFoundError'
     }
 }
 
-export class UnauthorizedError extends BaseError {
+export class UnauthorizedError extends HttpBaseError {
     constructor(message = 'Unauthorized', location = 'unknown') {
         super(message, location, 401, true)
         this.name = 'UnauthorizedError'
     }
 }
 
-export class forbiddenError extends BaseError {
+export class forbiddenError extends HttpBaseError {
     constructor(message = 'Forbidden', location = 'unknown') {
         super(message, location, 403, true)
         this.name = 'ForbiddenError'
     }
 }
 
-export class ConflictError extends BaseError {
+export class ConflictError extends HttpBaseError {
     constructor(message = 'Conflict', location = 'unknown') {
         super(message, location, 409, true)
         this.name = 'ConflictError'
     }
 }
 
-export class InternalServerError extends BaseError {
+export class InternalServerError extends HttpBaseError {
     constructor(message = 'Internal Server Error', location = 'unknown') {
         super(message, location, 500, false)
         this.name = 'InternalServerError'
     }
 }
 
-export class DuplicateEntry extends BaseError {
+export class DuplicateEntry extends HttpBaseError {
     constructor(message = 'Duplicate data entry found', location = 'unknown') {
         super(message, location, 400, true)
         this.name = 'DuplicateEntry'

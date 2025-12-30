@@ -3,17 +3,31 @@ import {
     NotFoundError,
     UnauthorizedError,
 } from '../../errors/httpErrors.js'
-import { IAuthRepository } from './interfaces/IAuthRepository.interface.js'
-import { IAuthService } from './interfaces/IAuthService.interface.js'
-import { IUser } from './interfaces/IUserProps.interface.js'
-import { signIn } from '../../utils/jwtService.js'
+
+import {
+    IUser,
+    IAuthRepository,
+    IAuthService,
+    Payload,
+} from './interfaces/authInterface.js'
+import { signIn, verifyToken } from '../../utils/jwtService.js'
 import { type LoginResponseType } from './types/LoginResponseType.type.js'
-import { comparePassword } from '../../utils/password.js'
-import { redisClient } from '../../config/redisConnection.js'
 import { logger } from '../../middlewares/logHandler.js'
+import { RedisClientType } from 'redis'
 
 export class AuthService implements IAuthService {
-    constructor(private readonly authRepository: IAuthRepository) {}
+    private readonly authRepository: IAuthRepository
+    private readonly comparePassword: (
+        password: string,
+        hashedPassword: string
+    ) => Promise<boolean>
+    private redis: RedisClientType
+
+    constructor(authRepository: IAuthRepository, comparePassword, redisClient) {
+        this.authRepository = authRepository
+        this.comparePassword = comparePassword
+        this.redis = redisClient
+    }
 
     async register(
         name: string,
@@ -47,35 +61,37 @@ export class AuthService implements IAuthService {
             )
         }
 
-        const isValid = await comparePassword(password, user.password)
+        const isValid = await this.comparePassword(password, user.password)
         if (!isValid) {
             throw new UnauthorizedError('Invalid credentials')
         }
-        const payload = {
+        const payload: Payload = {
             sub: String(user._id),
             email: user.email,
         }
 
         const token = await signIn(payload)
-        await redisClient.set(`session:${token}`, String(user._id), {
+        await this.redis.set(`session:${token}`, String(user._id), {
             EX: 3600,
-        }) // Set token with 1 hour expiration
-        logger.info(await redisClient.get(`session:${token}`))
+        })
+        logger.info(await this.redis.get(`session:${token}`))
         return {
-            success: true,
-            status: 200,
-            message: 'Login successful',
-            data: {
-                id: user._id,
-                email: user.email,
-                token: token,
-            },
+            id: user._id,
+            email: user.email,
+            token: token,
         }
     }
 
     async logout(token: string): Promise<boolean> {
+        //get loggedInuser
+        //when token comes in decode the user
+        //match the user , if match delete the user from redis session
         //validation check for user existence
-        await redisClient.del(`session:${token}`)
+        // await this.redis.del(`session:${token}`)
+        // return true
+        logger.info('testing')
+        const payload = await verifyToken(token)
+        logger.info(payload)
         return true
     }
 }

@@ -1,14 +1,22 @@
 import { AuthService } from '../../dist/features/auth/auth.service.js'
-import { mockAuthRepository } from '../__mocks__/authService.mock.js'
+import { mockAuthRepository } from '../../dist/features/auth/__mocks__/auth.respository.js'
 import { jest } from '@jest/globals'
+
+let authRepo
+
+beforeAll(() => {
+    authRepo = mockAuthRepository(jest)
+})
+
+afterAll(() => {
+    jest.clearAllMocks()
+    jest.resetAllMocks()
+})
 
 describe('AuthService.register', () => {
     let authService
-    let authRepo
 
     beforeEach(() => {
-        authRepo = mockAuthRepository(jest)
-
         authRepo.findByEmail.mockResolvedValue(null) // No existing user
         authRepo.createUser.mockResolvedValue({
             id: 'user123',

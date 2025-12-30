@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { verifyToken } from '../utils/jwtService.js'
 import { logger } from './logHandler.js'
-import { redisClient } from '../config/redisConnection.js'
 
 export const authHandler = async (
     req: Request,
@@ -17,18 +16,13 @@ export const authHandler = async (
     }
 
     const token = authHeader.split(' ')[1]
+    if (!token) throw new Error('No token provided')
 
     try {
-        const decoded = await verifyToken(token)
-        if (!decoded) {
-            logger.error('Invalid token')
-            res.status(401).json({ message: 'Invalid token' })
-            return
-        }
-
+        const payload = await verifyToken(token)
         req.user = {
-            userId: decoded.sub,
-            email: decoded.email,
+            userId: payload.sub,
+            email: payload.email,
         }
 
         next()

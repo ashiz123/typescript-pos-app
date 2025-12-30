@@ -1,22 +1,24 @@
 {
-  "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "module": "NodeNext",
-    "moduleResolution": "nodeNext",
-    "target": "ES2022",
-    "lib" : ["ES2022"],
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "strict": true,
-    "declaration": true,
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "moduleDetection": "force",
-    "noImplicitAny": false,
-    "incremental": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "module": "NodeNext",
+        "moduleResolution": "nodeNext",
+        "target": "ES2022",
+        "lib": ["ES2022"],
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "isolatedModules": true,
+        "strict": true,
+        "declaration": true,
+        "sourceMap": true,
+        "skipLibCheck": true,
+        "moduleDetection": "force",
+        "noImplicitAny": false,
+        "incremental": true
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist"]
 }
+
+//  "dist/features/auth/__mocks__"

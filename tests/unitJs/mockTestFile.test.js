@@ -1,4 +1,4 @@
-import { testFunction } from '../__mocks__/test'
+import { testFunction } from '../../dist/features/auth/__mocks__/test.js'
 
 test('check manual mock is used', () => {
     const result = testFunction()
