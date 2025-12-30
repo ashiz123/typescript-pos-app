@@ -152,11 +152,11 @@ describe('login service', () => {
     })
 })
 
-// describe('logout user', async () => {
-//     it('should return true', async () => {
-//         const token = 'fake-token'
-//         mockRedisClient.del.mockResolvedValue(1)
-//         await authService.logout(token)
-//         expect(result).toBe(true)
-//     })
-// })
+describe('logout user', async () => {
+    it('should return true', async () => {
+        const token = 'fake-token'
+        mockRedisClient.del.mockResolvedValue(1)
+        const result = await authService.logout(token)
+        expect(result).toBe(true)
+    })
+})

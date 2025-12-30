@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
 import { verifyToken } from '../utils/jwtService.js'
-import { logger } from './logHandler.js'
 
 export const authHandler = async (
     req: Request,

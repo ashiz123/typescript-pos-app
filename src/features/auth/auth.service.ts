@@ -83,15 +83,7 @@ export class AuthService implements IAuthService {
     }
 
     async logout(token: string): Promise<boolean> {
-        //get loggedInuser
-        //when token comes in decode the user
-        //match the user , if match delete the user from redis session
-        //validation check for user existence
-        // await this.redis.del(`session:${token}`)
-        // return true
-        logger.info('testing')
-        const payload = await verifyToken(token)
-        logger.info(payload)
+        await this.redis.del(`session:${token}`)
         return true
     }
 }
