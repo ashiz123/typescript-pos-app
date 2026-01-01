@@ -10,7 +10,7 @@ import {
     IAuthService,
     Payload,
 } from './interfaces/authInterface.js'
-import { signIn, verifyToken } from '../../utils/jwtService.js'
+import { signIn } from '../../utils/jwtService.js'
 import { type LoginResponseType } from './types/LoginResponseType.type.js'
 import { logger } from '../../middlewares/logHandler.js'
 import { RedisClientType } from 'redis'
@@ -71,7 +71,7 @@ export class AuthService implements IAuthService {
         }
 
         const token = await signIn(payload)
-        await this.redis.set(`session:${token}`, String(user._id), {
+        await this.redis.set(`session:${token}`, JSON.stringify(payload), {
             EX: 3600,
         })
         logger.info(await this.redis.get(`session:${token}`))

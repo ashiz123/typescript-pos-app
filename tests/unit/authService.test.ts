@@ -1,4 +1,12 @@
-import { MockedFunction, vi, type Mocked } from 'vitest'
+import {
+    MockedFunction,
+    vi,
+    type Mocked,
+    describe,
+    it,
+    beforeEach,
+    expect,
+} from 'vitest'
 import { AuthService } from '../../src/features/auth/auth.service'
 import { ComparePasswordFn } from '../../src/utils/password'
 import { signIn, SignInType } from '../../src/utils/jwtService'
@@ -146,7 +154,7 @@ describe('login service', () => {
         // Verify Redis interaction
         expect(mockRedisClient.set).toHaveBeenCalledWith(
             `session:${mockToken}`,
-            'user123',
+            '{"sub":"user123","email":"test@example.com"}',
             { EX: 3600 }
         )
     })
