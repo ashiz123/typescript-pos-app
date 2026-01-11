@@ -8,7 +8,6 @@ services:
             - '3000:3000'
         env_file:
             - .env.development
-
         depends_on:
             - mongo_pos
         volumes:

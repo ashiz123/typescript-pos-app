@@ -39,7 +39,7 @@ export const UserSchema: Schema<IUser> = new Schema(
         timestamps: true,
     }
 )
-
+//hashing the password
 UserSchema.pre<IUser>('save', async function (next) {
     if (!this.isModified('password')) return next()
     const salt = await bcrypt.genSalt(10)
@@ -47,6 +47,7 @@ UserSchema.pre<IUser>('save', async function (next) {
     next()
 })
 
+//comparing the password first
 UserSchema.methods.comparePassword = async function (
     candidatePassword: string
 ): Promise<boolean> {

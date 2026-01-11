@@ -3,7 +3,6 @@ import { type IAuthService } from './interfaces/authInterface.js'
 import { RegisterSchemaValidation } from './validations/RegisterSchemaValidation.js'
 import { LoginSchemaValidation } from './validations/LoginSchemaValidation.js'
 import { logger } from '../../middlewares/logHandler.js'
-import { AuthService } from './auth.service.js'
 
 export const registerUser =
     (authService: IAuthService) =>
