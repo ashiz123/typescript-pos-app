@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
-import { type IAuthService } from './interfaces/IAuthService.interface.js'
+import { type IAuthService } from './interfaces/authInterface.js'
 import { RegisterSchemaValidation } from './validations/RegisterSchemaValidation.js'
+import { LoginSchemaValidation } from './validations/LoginSchemaValidation.js'
 import { logger } from '../../middlewares/logHandler.js'
-import { AuthService } from './auth.service.js'
 
 export const registerUser =
     (authService: IAuthService) =>
@@ -10,7 +10,7 @@ export const registerUser =
         try {
             const data = RegisterSchemaValidation.parse(req.body)
             const { name, email, phone, password } = data
-            const result = await authService.registerUser(
+            const result = await authService.register(
                 name,
                 email,
                 phone,
@@ -26,9 +26,14 @@ export const loginUser =
     (authService: IAuthService) =>
     async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { email, password } = req.body
-            const result = await authService.loginUser(email, password)
-            res.status(200).json({ result })
+            const data = LoginSchemaValidation.parse(req.body)
+            const { email, password } = data
+            const result = await authService.login(email, password)
+            res.status(200).json({
+                success: true,
+                message: 'User logged in successfully',
+                data: result,
+            })
         } catch (err) {
             next(err)
         }
@@ -37,7 +42,6 @@ export const loginUser =
 export const getAuthUser =
     () => async (req: Request, res: Response, next: NextFunction) => {
         try {
-            console.log('user', req.user)
             const loggedInUser = await req.user
             res.status(200).json({ loggedInUser })
         } catch (error) {
@@ -50,11 +54,11 @@ export const logoutUser =
     (authService: IAuthService) =>
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         const token = req.headers.authorization?.split(' ')[1] || ''
-        const result = await authService.logoutUser(token)
+        const result = await authService.logout(token)
         if (!result) {
             logger.error('Logout user failed')
             return next(new Error('Logout failed'))
         }
 
-        res.json({ message: 'User logged out successfully' })
+        res.status(200).json({ message: 'User logged out successfully' })
     }

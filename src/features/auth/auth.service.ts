@@ -1,21 +1,35 @@
-import bcrypt from 'bcryptjs'
 import {
     ConflictError,
     NotFoundError,
     UnauthorizedError,
 } from '../../errors/httpErrors.js'
-import { IAuthRepository } from './interfaces/IAuthRepository.interface.js'
-import { IAuthService } from './interfaces/IAuthService.interface.js'
-import { IUser } from './interfaces/IUserProps.interface.js'
+
+import {
+    IUser,
+    IAuthRepository,
+    IAuthService,
+    Payload,
+} from './interfaces/authInterface.js'
 import { signIn } from '../../utils/jwtService.js'
 import { type LoginResponseType } from './types/LoginResponseType.type.js'
-import { comparePassword } from '../../utils/password.js'
-import { tokenBlacklist } from '../../utils/tokenBlackList.js'
+import { logger } from '../../middlewares/logHandler.js'
+import { RedisClientType } from 'redis'
 
 export class AuthService implements IAuthService {
-    constructor(private readonly authRepository: IAuthRepository) {}
+    private readonly authRepository: IAuthRepository
+    private readonly comparePassword: (
+        password: string,
+        hashedPassword: string
+    ) => Promise<boolean>
+    private redis: RedisClientType
 
-    async registerUser(
+    constructor(authRepository: IAuthRepository, comparePassword, redisClient) {
+        this.authRepository = authRepository
+        this.comparePassword = comparePassword
+        this.redis = redisClient
+    }
+
+    async register(
         name: string,
         email: string,
         phone: string,
@@ -38,10 +52,7 @@ export class AuthService implements IAuthService {
         )
     }
 
-    async loginUser(
-        email: string,
-        password: string
-    ): Promise<LoginResponseType> {
+    async login(email: string, password: string): Promise<LoginResponseType> {
         const user: IUser | null = await this.authRepository.findByEmail(email)
         if (!user) {
             throw new NotFoundError(
@@ -50,35 +61,29 @@ export class AuthService implements IAuthService {
             )
         }
 
-        const isValid = await comparePassword(password, user.password)
+        const isValid = await this.comparePassword(password, user.password)
         if (!isValid) {
             throw new UnauthorizedError('Invalid credentials')
         }
-        const payload = {
+        const payload: Payload = {
             sub: String(user._id),
             email: user.email,
         }
 
         const token = await signIn(payload)
-
+        await this.redis.set(`session:${token}`, JSON.stringify(payload), {
+            EX: 3600,
+        })
+        logger.info(await this.redis.get(`session:${token}`))
         return {
-            success: true,
-            status: 200,
-            message: 'Login successful',
-            data: {
-                id: user._id,
-                email: user.email,
-                token: token,
-            },
+            id: user._id,
+            email: user.email,
+            token: token,
         }
     }
 
-    async logoutUser(token: string): Promise<boolean> {
-        //validation check for user existence
-        if (!token) {
-            throw new UnauthorizedError('Invalid token')
-        }
-        tokenBlacklist.add(token)
+    async logout(token: string): Promise<boolean> {
+        await this.redis.del(`session:${token}`)
         return true
     }
 }

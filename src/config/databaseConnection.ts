@@ -1,5 +1,6 @@
 // load variables from .env
-import mongoose from 'mongoose'
+import mongoose, { mongo } from 'mongoose'
+import { logger } from '../middlewares/logHandler.js'
 
 class Database {
     private static instance: Database
@@ -13,8 +14,11 @@ class Database {
     }
 
     public async connect(): Promise<void> {
-        if (mongoose.connection.readyState === 1) {
-            console.log('MongoDB already connected')
+        if (
+            mongoose.connection.readyState === 1 ||
+            mongoose.connection.readyState === 2
+        ) {
+            logger.info('Mongodb already connected')
             return
         }
 
@@ -23,19 +27,38 @@ class Database {
             process.exit(1)
         }
 
-        const mongo_uri: string =
-            `${process.env.MONGO_DRIVER}://${process.env.MONGO_INITDB_ROOT_USERNAME}:${process.env.MONGO_INITDB_ROOT_PASSWORD}@${process.env.MONGO_HOST}:27017/pos_db?authSource=admin` ||
-            process.env.MONGODB_URL
+        console.log('Attempting connecting mongo db')
+        const mongo_uri: string = process.env.MONGODB_URL
 
         try {
-            console.log('Connecting to MongoDB...', mongo_uri)
-            const conn = await mongoose.connect(mongo_uri, {
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
-            } as mongoose.ConnectOptions)
+            const conn = await mongoose.connect(mongo_uri)
             console.log(`mongodb connected: ${conn.connection.host}`)
         } catch (error) {
             console.error('Connection failed with error:', error)
+            process.exit(1)
+        }
+    }
+
+    public async disconnect() {
+        try {
+            await mongoose.connection.close()
+            console.log('MongoDB Disconnected Successfully')
+        } catch (error) {
+            console.error('Error connecting db', error)
+            process.exit(1)
+        }
+    }
+
+    public async dropAllDatabase() {
+        try {
+            if (mongoose.connection.db) {
+                await mongoose.connection.db.dropDatabase()
+                console.log('Database dropped successfully')
+            } else {
+                console.error('No active database connection to drop')
+            }
+        } catch (error) {
+            console.error('Error dropping dbs', error)
             process.exit(1)
         }
     }

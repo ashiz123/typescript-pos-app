@@ -1,4 +1,4 @@
-export class BaseError extends Error {
+export class HttpBaseError extends Error {
     statusCode: number
     expose: boolean
     type: string

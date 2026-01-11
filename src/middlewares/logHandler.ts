@@ -1,5 +1,5 @@
 import { createLogger, format, transports } from 'winston'
-const { combine, timestamp, label, prettyPrint } = format
+const { combine, timestamp, prettyPrint } = format
 
 export const logger = createLogger({
     level: 'info',
@@ -18,5 +18,3 @@ export const logger = createLogger({
 // if (process.env.NODE_ENV !== 'production') {
 //     logger.add(new transports.Console())
 // }
-
-logger.info('Logger initialized')

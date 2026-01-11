@@ -1,7 +1,7 @@
 import { ZodError } from 'zod'
-import { BaseError } from '../errors/baseError.js'
+import { HttpBaseError } from './httpBaseError.js'
 
-export function isHttpError(err: unknown): err is BaseError {
+export function isHttpError(err: unknown): err is HttpBaseError {
     return (
         !!err &&
         typeof err === 'object' &&

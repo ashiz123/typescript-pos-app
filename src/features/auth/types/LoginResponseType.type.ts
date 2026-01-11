@@ -1,10 +1,5 @@
-export type LoginResponseType  = {
-  success: true;
-  status: number;
-  message: string;
-  data: {
-    id: string;
-    email: string;
-    token: string;
-  };
+export type LoginResponseType = {
+    id: string
+    email: string
+    token: string
 }
