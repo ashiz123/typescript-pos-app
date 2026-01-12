@@ -10,6 +10,10 @@ import {
 } from '../auth/validations/BusinessSchemaValidation'
 import { NotFoundError } from '../../errors/httpErrors'
 
+interface AuthRequest extends Request {
+    user?: { userId: string }
+}
+
 class BusinessController implements ICrudController {
     private readonly businessService: ICrudService<BusinessProps>
 
@@ -17,7 +21,7 @@ class BusinessController implements ICrudController {
         this.businessService = businessService
     }
 
-    create = async (req: Request, res: Response, next: NextFunction) => {
+    create = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
             if (!req.user?.userId) {
                 throw new Error('Loggedin user not found')
