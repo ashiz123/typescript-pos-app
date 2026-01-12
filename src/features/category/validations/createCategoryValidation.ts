@@ -5,7 +5,7 @@ const objectIdSchema = z
     .string()
     .regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId format')
 
-export const CategorySchema = z
+export const CreateCategorySchema = z
     .object({
         title: z.string().min(1, 'Title is required').trim(),
         description: z.string().optional(),
@@ -15,4 +15,4 @@ export const CategorySchema = z
     })
     .strict()
 
-export type CategoryRequest = z.infer<typeof CategorySchema>
+export type CategoryRequest = z.infer<typeof CreateCategorySchema>

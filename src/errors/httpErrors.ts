@@ -48,3 +48,13 @@ export class DuplicateEntry extends HttpBaseError {
         this.name = 'DuplicateEntry'
     }
 }
+
+export class ExtraValidationError extends HttpBaseError {
+    constructor(
+        message = 'Extra validation error from db',
+        location = 'unknown'
+    ) {
+        super(message, location, 400, true)
+        this.name = 'Extra validation error'
+    }
+}
