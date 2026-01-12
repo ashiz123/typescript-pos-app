@@ -1,12 +1,16 @@
 import express, { Router } from 'express'
 import { RouteConfig, RouteHandler } from './baseType'
+import { ICrudController } from './crudControllerInterface'
 
 type OptionType = {
     exclude: string[]
     middleware: RouteHandler[]
 }
 
-export function createCrudRoutes(controller, options: OptionType): Router {
+export function createCrudRoutes(
+    controller: ICrudController,
+    options: OptionType
+): Router {
     const router = express.Router()
     const { middleware, exclude } = options
 
