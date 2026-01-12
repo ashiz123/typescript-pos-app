@@ -1,9 +1,10 @@
-import { NotFoundError } from '../../errors/httpErrors'
+import { ExtraValidationError, NotFoundError } from '../../errors/httpErrors'
 import { CategoryRepository, ICategoryRepository } from './category.repository'
 import { ICrudService } from '../../shared/baseService'
 import { CreateCategoryDTO, ICategory } from './category.model'
 import { Types, UpdateQuery } from 'mongoose'
-import { CategoryRequest } from '../auth/validations/CategorySchemaValidation'
+import { CategoryRequest } from './validations/createCategoryValidation'
+import { logger } from '../../middlewares/logHandler'
 
 export class CategoryService implements ICrudService<ICategory> {
     private repo: ICategoryRepository
@@ -26,20 +27,6 @@ export class CategoryService implements ICrudService<ICategory> {
         // if (category) throw new NotFoundError('Category not exist')
     }
 
-    // async create(data: Partial<ICategory>): Promise<ICategory> {
-    //     const persistenceData: Partial<CreateCategoryDTO> = {
-    //         ...data,
-    //         businessId: new Types.ObjectId(data.businessId),
-    //         parentCategoryId: data.parentCategoryId
-    //             ? new Types.ObjectId(data.parentCategoryId)
-    //             : undefined,
-    //     }
-
-    //     const newCategory: ICategoryDocument =
-    //         await this.repo.create(persistenceData)
-    //     return newCategory
-    // }
-    //
     async create(data: Partial<ICategory>): Promise<ICategory> {
         const persistenceData: CreateCategoryDTO = {
             ...(data as CategoryRequest),
@@ -56,7 +43,11 @@ export class CategoryService implements ICrudService<ICategory> {
         id: string,
         data: UpdateQuery<ICategory>
     ): Promise<ICategory | null> {
-        return this.repo.update(id, data)
+        const updatedCategory = await this.repo.update(id, data)
+        if (updatedCategory?.isNew === false) {
+            throw new ExtraValidationError('No data to update')
+        }
+        return updatedCategory
     }
 
     async delete(id: string): Promise<boolean> {

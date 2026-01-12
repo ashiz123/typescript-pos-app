@@ -3,8 +3,9 @@ import { ICrudService } from '../../shared/baseService'
 import { ICategory } from './category.model'
 import {
     CategoryRequest,
-    CategorySchema,
-} from '../auth/validations/CategorySchemaValidation'
+    CreateCategorySchema,
+} from './validations/createCategoryValidation'
+import { UpdateCategorySchema } from './validations/updateCategoryValidation'
 import { ApiResponse } from '../../types/apiResponseType'
 
 export class CategoryController {
@@ -45,7 +46,7 @@ export class CategoryController {
         next: NextFunction
     ) => {
         try {
-            const data: CategoryRequest = CategorySchema.parse(req.body)
+            const data: CategoryRequest = CreateCategorySchema.parse(req.body)
             const newCategory = await this.categoryService.create(data)
             const response: ApiResponse<typeof newCategory> = {
                 success: true,
@@ -66,12 +67,17 @@ export class CategoryController {
     ) => {
         try {
             const { id } = req.params
-            const { data } = req.body
+            const data = UpdateCategorySchema.parse(req.body)
+            console.log('data is', data)
             const editCatgory = await this.categoryService.update(id, data)
             if (!editCatgory) {
                 throw new Error('Category is not updated')
             }
-            return res.status(200).json({ data: editCatgory })
+            const response: ApiResponse<typeof editCatgory> = {
+                success: true,
+                data: editCatgory,
+            }
+            return res.status(200).json(response)
         } catch (error) {
             console.log(error)
             next(error)
@@ -89,9 +95,12 @@ export class CategoryController {
             if (!deletedCategory) {
                 throw new Error('Category cannot deleted')
             }
-            return res
-                .status(200)
-                .json({ message: 'Category deleted successfully' })
+            const response: ApiResponse<object> = {
+                success: true,
+                data: {},
+                message: 'Category Deleted successfully',
+            }
+            return res.status(200).json(response)
         } catch (error) {
             next(error)
         }
