@@ -4,12 +4,11 @@ import { ICrudService } from '../../shared/baseService'
 import { CreateCategoryDTO, ICategory } from './category.model'
 import { Types, UpdateQuery } from 'mongoose'
 import { CategoryRequest } from './validations/createCategoryValidation'
-import { logger } from '../../middlewares/logHandler'
 
 export class CategoryService implements ICrudService<ICategory> {
     private repo: ICategoryRepository
 
-    constructor(repo: CategoryRepository) {
+    constructor(repo: ICategoryRepository) {
         this.repo = repo
     }
 

@@ -53,7 +53,7 @@ export class CategoryController {
                 data: newCategory,
                 message: 'Category added successfully',
             }
-            res.json(200).json(response)
+            res.status(200).json(response)
         } catch (error) {
             console.log(error)
             next(error)
@@ -68,7 +68,6 @@ export class CategoryController {
         try {
             const { id } = req.params
             const data = UpdateCategorySchema.parse(req.body)
-            console.log('data is', data)
             const editCatgory = await this.categoryService.update(id, data)
             if (!editCatgory) {
                 throw new Error('Category is not updated')
