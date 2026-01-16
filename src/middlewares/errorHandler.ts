@@ -1,5 +1,5 @@
 import type { ErrorRequestHandler } from 'express'
-import { date, z } from 'zod'
+import { z } from 'zod'
 import { isHttpError, isError, isZodError } from '../errors/guard.js'
 import { Request, Response, NextFunction } from 'express'
 import { logger } from './logHandler.js'
