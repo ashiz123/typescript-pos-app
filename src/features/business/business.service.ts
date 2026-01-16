@@ -4,7 +4,14 @@ import { BusinessRepository, IBusinessRepository } from './business.repository'
 import { BusinessProps, CreateBusinessDTO } from './business.model'
 import { BusinessRequest } from '../auth/validations/BusinessSchemaValidation'
 
-export class BusinessService implements ICrudService<BusinessProps> {
+export type AuthUserBusinessProps = BusinessProps & { userId: string }
+
+export interface IBusinessService<T> extends ICrudService<BusinessProps> {
+    filterBusinessByAuthUser(authId: string): Promise<T[]>
+    filterBusinessByName(name: string): Promise<T | null>
+}
+
+export class BusinessService implements IBusinessService<BusinessProps> {
     private repo: IBusinessRepository
 
     constructor(repo: IBusinessRepository) {
@@ -19,9 +26,7 @@ export class BusinessService implements ICrudService<BusinessProps> {
         return this.repo.findAll()
     }
 
-    async create(
-        data: BusinessProps & { userId: string }
-    ): Promise<BusinessProps> {
+    async create(data: AuthUserBusinessProps): Promise<BusinessProps> {
         const persistenceData: CreateBusinessDTO = {
             ...(data as BusinessRequest),
             userId: new Types.ObjectId(data.userId),
@@ -39,6 +44,14 @@ export class BusinessService implements ICrudService<BusinessProps> {
 
     async delete(id: string): Promise<boolean> {
         return this.repo.delete(id)
+    }
+
+    async filterBusinessByAuthUser(authId: string): Promise<BusinessProps[]> {
+        return this.repo.filterByUserId(authId)
+    }
+
+    async filterBusinessByName(name: string): Promise<BusinessProps | null> {
+        return this.repo.filterByName(name)
     }
 }
 

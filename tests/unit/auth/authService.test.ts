@@ -7,27 +7,25 @@ import {
     beforeEach,
     expect,
 } from 'vitest'
-import { AuthService } from '../../src/features/auth/auth.service'
-import { ComparePasswordFn } from '../../src/utils/password'
-import { signIn, SignInType } from '../../src/utils/jwtService'
+import { AuthService } from '../../../src/features/auth/auth.service'
+import { ComparePasswordFn } from '../../../src/utils/password'
+import { signIn } from '../../../src/utils/jwtService'
 
 import {
     IAuthRepository,
     IAuthService,
     IUser,
-} from '../../src/features/auth/interfaces/authInterface'
+} from '../../../src/features/auth/interfaces/authInterface'
 import {
     ConflictError,
     NotFoundError,
     UnauthorizedError,
-} from '../../src/errors/httpErrors'
+} from '../../../src/errors/httpErrors'
 import bcrypt from 'bcryptjs'
 import { RedisClientType } from 'redis'
 
 // Your mock must look like this:
-vi.mock('../../src/utils/jwtService', () => ({
-    signIn: vi.fn(),
-}))
+vi.mock('../../../src/utils/jwtService')
 
 let authService: IAuthService
 let mockAuthRepository: Mocked<IAuthRepository>
@@ -130,8 +128,8 @@ describe('login service', () => {
             password: 'hashedPassword',
         }
 
-        const mockSignIn: MockedFunction<SignInType> = vi.mocked(signIn)
-        const mockToken = 'fake-jwt-token-created'
+        const mockSignIn: MockedFunction<typeof signIn> = vi.mocked(signIn)
+        const mockToken: string = 'fake-jwt-token-created'
 
         mockAuthRepository.findByEmail.mockResolvedValue(mockUser as IUser) //there is user
         mockComparePassword.mockResolvedValue(true) //password matched

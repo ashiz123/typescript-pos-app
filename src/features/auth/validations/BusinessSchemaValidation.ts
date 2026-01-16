@@ -5,7 +5,7 @@ export const BusinessSchema = z
         name: z.string(),
         address: z.string(),
         // Optional fields
-        website: z.url().optional(),
+        website: z.string().optional(),
         email: z.email().optional(),
         phone: z.string().optional(),
         businessType: z.string().optional(),

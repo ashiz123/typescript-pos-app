@@ -8,8 +8,8 @@ export interface IBusinessRepository extends ICrudRepository<
     CreateBusinessDTO,
     UpdateBusinessDTO
 > {
-    findByUserId(userId: string): Promise<IBusinessDocument[]>
-    filterByName(name: string): Promise<IBusinessDocument[]>
+    filterByUserId(userId: string): Promise<IBusinessDocument[]>
+    filterByName(name: string): Promise<IBusinessDocument | null>
 }
 
 //class
@@ -25,11 +25,11 @@ export class BusinessRepository
         super(BusinessModel)
     }
 
-    async findByUserId(userId: string): Promise<IBusinessDocument[]> {
+    async filterByUserId(userId: string): Promise<IBusinessDocument[]> {
         return this.model.find({ userId })
     }
 
-    async filterByName(name: string): Promise<IBusinessDocument[]> {
-        return this.model.find({ name: { $regex: name, $options: 'i' } })
+    async filterByName(name: string): Promise<IBusinessDocument | null> {
+        return this.model.findOne({ name: { $regex: name, $options: 'i' } })
     }
 }

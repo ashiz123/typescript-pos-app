@@ -10,11 +10,11 @@ import {
 } from '../auth/validations/BusinessSchemaValidation'
 import { NotFoundError } from '../../errors/httpErrors'
 
-interface AuthRequest extends Request {
-    user?: { userId: string }
+export interface AuthRequest extends Request {
+    user?: { userId: string; email: string }
 }
 
-class BusinessController implements ICrudController {
+export class BusinessController implements ICrudController {
     private readonly businessService: ICrudService<BusinessProps>
 
     constructor(businessService: ICrudService<BusinessProps>) {
@@ -87,6 +87,7 @@ class BusinessController implements ICrudController {
             const response: ApiResponse<BusinessProps> = {
                 success: true,
                 data: updatedBusiness,
+                message: 'Business updated successfully',
             }
 
             res.status(200).json(response)
@@ -103,8 +104,9 @@ class BusinessController implements ICrudController {
             if (!deletedBusiness) {
                 throw new Error('Business can not deleted')
             }
-            const response: ApiResponse<BusinessProps> = {
+            const response: ApiResponse<object> = {
                 success: true,
+                data: {},
                 message: 'Business deleted successfully',
             }
             res.status(200).json(response)

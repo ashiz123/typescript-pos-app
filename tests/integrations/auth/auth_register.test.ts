@@ -1,6 +1,6 @@
 import request from 'supertest'
 import { describe, it, expect } from 'vitest'
-import app from '../../src/app'
+import app from '../../../src/config/app'
 
 describe.sequential('User registered Integration test', () => {
     const user = {

@@ -1,7 +1,7 @@
 import request from 'supertest'
-import { describe, it, expect, afterAll, beforeAll } from 'vitest'
-import app from '../../src/app'
-import { getRedisClient } from '../../src/config/redisConnection'
+import { describe, it, expect } from 'vitest'
+import app from '../../../src/config/app'
+import { getRedisClient } from '../../../src/config/redisConnection'
 
 describe.sequential('User login Integration test', () => {
     const user = {

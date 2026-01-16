@@ -3,14 +3,14 @@ import {
     registerUser,
     loginUser,
     logoutUser,
-} from '../../src/features/auth/auth.controller.js'
+} from '../../../src/features/auth/auth.controller.js'
 import type {
     IAuthService,
     IUserProps,
-} from '../../src/features/auth/interfaces/authInterface.js'
+} from '../../../src/features/auth/interfaces/authInterface.js'
 import type { Request, Response, NextFunction } from 'express'
 import { ZodError } from 'zod'
-import { LoginResponseType } from '../../src/features/auth/types/LoginResponseType.type.js'
+import { LoginResponseType } from '../../../src/features/auth/types/LoginResponseType.type.js'
 
 const mockUser: IUserProps = {
     _id: '1',

@@ -26,7 +26,7 @@ export const errorHandler: ErrorRequestHandler = (
                 date: new Date().toISOString(),
             })
             return res.status(400).json({
-                error: 'ValidationError',
+                error: 'Validation Error',
                 path:
                     err.issues.map((issue) => issue.path) +
                     ' field is required',
