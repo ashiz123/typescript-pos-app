@@ -17,3 +17,5 @@ export const UpdateCategorySchema = CreateCategorySchema.omit({
     .refine((data) => Object.keys(data).length > 0, {
         message: 'At least one field must be provided to update',
     })
+
+export type UpdateCategory = z.infer<typeof UpdateCategorySchema>

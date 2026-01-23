@@ -14,7 +14,8 @@ export type RouteHandler = (
 
 //config type
 export type RouteConfig = {
-    name: keyof ICrudController
+    // name: keyof ICrudController
+    name: string
     method: HttpMethod
     path: string
     handler: RouteHandler

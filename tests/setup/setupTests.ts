@@ -1,4 +1,4 @@
-import { beforeAll, afterAll } from 'vitest'
+import { beforeAll, afterAll, beforeEach } from 'vitest'
 import Database from '../../src/config/databaseConnection.js'
 import {
     getRedisClient,
@@ -9,6 +9,7 @@ const db = Database.getInstance()
 const redisClient = getRedisClient()
 
 beforeAll(async () => {
+    await db.dropAllDatabase()
     await db.connect()
     await connectRedis()
 })
@@ -22,5 +23,3 @@ afterAll(async () => {
         console.log('🔌 Redis Disconnected Successfully')
     }
 })
-
-//Do the global mocking

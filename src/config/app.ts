@@ -3,6 +3,7 @@ import express from 'express'
 import authRoutes from '../features/auth/auth.route.js'
 import categoryRoutes from '../features/category/category.route.js'
 import businessRoutes from '../features/business/business.route.js'
+import productRoute from '../features/products/product.route.js'
 import { errorHandler } from '../middlewares/errorHandler.js'
 
 const app = express()
@@ -13,6 +14,7 @@ app.use(express.json())
 app.use('/api/auth', authRoutes)
 app.use('/api/categories', categoryRoutes)
 app.use('/api/business', businessRoutes)
+app.use('/api/product', productRoute)
 // app.get('/api/health', (req, res) => {
 //     res.status(200).json({ status: 'ok' })
 // })

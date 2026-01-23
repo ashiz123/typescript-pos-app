@@ -13,7 +13,7 @@ import { comparePassword } from '../../utils/password.js'
 const redisClient = getRedisClient()
 const router = express.Router()
 const authRepository = new AuthRepository()
-const authService = new AuthService(
+export const authService = new AuthService(
     authRepository,
     comparePassword,
     redisClient
