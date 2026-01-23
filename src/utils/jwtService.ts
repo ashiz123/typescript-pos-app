@@ -16,8 +16,8 @@ if (!secret) {
 //     email: string
 // }
 
-const ISSUER: string = 'my-pos-auth'
-const AUDIENCE: string = 'my-pos-api'
+export const ISSUER: string = 'my-pos-auth'
+export const AUDIENCE: string = 'my-pos-api'
 
 export type SignInType = (data: Payload, ttl?: string) => Promise<string>
 export const signIn: SignInType = async (data, ttl = '10m') => {

@@ -27,3 +27,5 @@ export class CategoryRepository
         return this.model.find({ parentCategoryId: id })
     }
 }
+
+export const categoryRepository = new CategoryRepository()

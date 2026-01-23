@@ -26,7 +26,7 @@ describe.sequential('User login Integration test', () => {
             .send({ email: 'testing@gmail.com' })
 
         expect(response.status).toBe(400)
-        expect(response.body.error).toBe('ValidationError')
+        expect(response.body.error).toBe('Validation Error')
     })
 
     it('should login user successfully with token', async () => {
