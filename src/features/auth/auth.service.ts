@@ -5,10 +5,11 @@ import {
 } from '../../errors/httpErrors.js'
 
 import {
-    IUser,
+    IUserDocument,
     IAuthRepository,
     IAuthService,
     Payload,
+    IUserProps,
 } from './interfaces/authInterface.js'
 import { signIn } from '../../utils/jwtService.js'
 import { type LoginResponseType } from './types/LoginResponseType.type.js'
@@ -29,13 +30,9 @@ export class AuthService implements IAuthService {
         this.redis = redisClient
     }
 
-    async register(
-        name: string,
-        email: string,
-        phone: string,
-        password: string
-    ): Promise<IUser> {
-        const user: IUser | null = await this.authRepository.findByEmail(email)
+    async register(data: IUserProps): Promise<IUserDocument> {
+        const user: IUserDocument | null =
+            await this.authRepository.findByEmail(data.email)
 
         if (user) {
             throw new ConflictError(
@@ -44,16 +41,13 @@ export class AuthService implements IAuthService {
             )
         }
 
-        return await this.authRepository.createUser(
-            name,
-            email,
-            phone,
-            password
-        )
+        return await this.authRepository.createUser(data)
     }
 
     async login(email: string, password: string): Promise<LoginResponseType> {
-        const user: IUser | null = await this.authRepository.findByEmail(email)
+        const user: IUserDocument | null =
+            await this.authRepository.findByEmail(email)
+        console.log(user)
         if (!user) {
             throw new NotFoundError(
                 'User not registered',
@@ -68,6 +62,7 @@ export class AuthService implements IAuthService {
         const payload: Payload = {
             sub: String(user._id),
             email: user.email,
+            role: user.role,
         }
 
         const token = await signIn(payload)

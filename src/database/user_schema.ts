@@ -1,8 +1,8 @@
 import { Schema } from 'mongoose'
-import { IUser } from '../features/auth/interfaces/authInterface.js'
+import { IUserDocument } from '../features/auth/interfaces/authInterface.js'
 import bcrypt from 'bcryptjs'
 
-export const UserSchema: Schema<IUser> = new Schema(
+export const UserSchema: Schema<IUserDocument> = new Schema(
     {
         name: {
             type: String,
@@ -26,13 +26,18 @@ export const UserSchema: Schema<IUser> = new Schema(
 
         role: {
             type: String,
-            enum: ['user', 'admin'],
-            default: 'user',
+            enum: ['admin', 'team-leader', 'manager', 'employee', 'cashier'],
+            default: 'admin',
         },
 
         password: {
             type: String,
             required: true,
+        },
+
+        businessId: {
+            type: Schema.Types.ObjectId,
+            required: false,
         },
     },
     {

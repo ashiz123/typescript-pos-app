@@ -14,14 +14,16 @@ describe('Category test', () => {
         parentCategoryId: '696373bcba24fb62c8619612',
     }
 
+    const newUser = {
+        name: 'testing',
+        email: 'testing@gmail.com',
+        phone: '2342342341',
+        password: 'testing123',
+    }
+
     beforeAll(async () => {
-        await authService.register(
-            'testing',
-            'test@gmail.com',
-            '243242323',
-            'testing123'
-        )
-        const user = await authService.login('test@gmail.com', 'testing123')
+        await authService.register(newUser)
+        const user = await authService.login('testing@gmail.com', 'testing123')
         authToken = user.token
     })
 

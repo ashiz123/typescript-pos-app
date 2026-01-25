@@ -14,7 +14,8 @@ import { signIn } from '../../../src/utils/jwtService'
 import {
     IAuthRepository,
     IAuthService,
-    IUser,
+    IUserDocument,
+    IUserProps,
 } from '../../../src/features/auth/interfaces/authInterface'
 import {
     ConflictError,
@@ -23,6 +24,7 @@ import {
 } from '../../../src/errors/httpErrors'
 import bcrypt from 'bcryptjs'
 import { RedisClientType } from 'redis'
+import { Types } from 'mongoose'
 
 // Your mock must look like this:
 vi.mock('../../../src/utils/jwtService')
@@ -54,54 +56,45 @@ beforeEach(() => {
 })
 
 describe('Register service', () => {
-    const newUser: Partial<IUser> = {
-        _id: '1',
+    const newUser: IUserProps = {
         name: 'Ram Doe',
         email: 'john@gmail.com',
         phone: '1234567890',
         password: 'hashedpassword',
-        createdAt: new Date(),
-        updatedAt: new Date(),
     }
 
     it('should create new user successfully', async () => {
         mockAuthRepository.findByEmail.mockResolvedValue(null)
-        mockAuthRepository.createUser.mockResolvedValue(newUser as IUser)
-        const result = await authService.register(
-            'Test User',
-            'test@example.com',
-            '1234567890',
-            'password123'
+        mockAuthRepository.createUser.mockResolvedValue(
+            newUser as IUserDocument
         )
+        const result = await authService.register(newUser)
 
         // Assert
         expect(mockAuthRepository.findByEmail).toHaveBeenCalledWith(
-            'test@example.com'
+            'john@gmail.com'
         )
         expect(result).toEqual(newUser)
     })
 
     it('should throw the conflict error, user already exist', async () => {
-        mockAuthRepository.findByEmail.mockResolvedValue(newUser as IUser)
-        const result = authService.register(
-            'Test User',
-            'test@example.com',
-            '1234567890',
-            'password123'
+        mockAuthRepository.findByEmail.mockResolvedValue(
+            newUser as IUserDocument
         )
+        const result = authService.register(newUser)
         await expect(result).rejects.toBeInstanceOf(ConflictError)
         expect(mockAuthRepository.createUser).not.toHaveBeenCalled()
     })
 })
 
 describe('login service', () => {
-    let loggedInUser: Partial<IUser>
+    let mockLoggedInUser: Partial<IUserProps>
 
     beforeEach(async () => {
-        loggedInUser = {
-            _id: '1',
+        mockLoggedInUser = {
             name: 'Ram Doe',
             email: 'john@gmail.com',
+            phone: '2345678909',
             password: await bcrypt.hash('hashedpassword', 10),
         }
     })
@@ -114,16 +107,18 @@ describe('login service', () => {
     })
 
     it('should throw unauthorized error if password does not match', async () => {
-        mockAuthRepository.findByEmail.mockResolvedValue(loggedInUser as IUser)
+        mockAuthRepository.findByEmail.mockResolvedValue(
+            mockLoggedInUser as IUserDocument
+        )
         mockComparePassword.mockResolvedValue(false)
-        const result = authService.login('test@gmail.com', 'wrongpassword')
+        const result = authService.login('john@gmail.com', 'wrongpassword')
         await expect(result).rejects.toBeInstanceOf(UnauthorizedError)
     })
 
     it('should return login response and store session in Redis on success', async () => {
         // Setup
         const mockUser = {
-            _id: 'user123',
+            _id: new Types.ObjectId('6961460e3d8efef86d62df90'),
             email: 'test@example.com',
             password: 'hashedPassword',
         }
@@ -131,28 +126,30 @@ describe('login service', () => {
         const mockSignIn: MockedFunction<typeof signIn> = vi.mocked(signIn)
         const mockToken: string = 'fake-jwt-token-created'
 
-        mockAuthRepository.findByEmail.mockResolvedValue(mockUser as IUser) //there is user
+        mockAuthRepository.findByEmail.mockResolvedValue(
+            mockUser as IUserDocument
+        ) //there is user
         mockComparePassword.mockResolvedValue(true) //password matched
         mockSignIn.mockResolvedValue(mockToken) //token received
-        mockRedisClient.get.mockResolvedValue('user123') //mock that you got data in redis.
+        // mockRedisClient.get.mockResolvedValue('6961460e3d8efef86d62df90') //mock that you got data in redis.
 
         // Execute
         const result = await authService.login(
-            'ashiz@example.com',
-            'password123'
+            'test@example.com',
+            'hashedPassword'
         )
 
         // Assertions
         expect(result).toEqual({
-            id: 'user123',
-            email: 'test@example.com',
+            id: mockUser._id,
+            email: mockUser.email,
             token: mockToken,
         })
 
         // Verify Redis interaction
         expect(mockRedisClient.set).toHaveBeenCalledWith(
             `session:${mockToken}`,
-            '{"sub":"user123","email":"test@example.com"}',
+            '{"sub":"6961460e3d8efef86d62df90","email":"test@example.com"}',
             { EX: 3600 }
         )
     })

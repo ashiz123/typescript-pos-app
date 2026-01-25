@@ -13,17 +13,13 @@ import { ZodError } from 'zod'
 import { LoginResponseType } from '../../../src/features/auth/types/LoginResponseType.type.js'
 
 const mockUser: IUserProps = {
-    _id: '1',
     name: 'Ram Doe',
     email: 'john@gmail.com',
     phone: '1234567890',
     password: 'hashedpassword',
-    createdAt: new Date(),
-    updatedAt: new Date(),
 }
 
 const mockLoginResponse: LoginResponseType = {
-    id: '123',
     email: 'test@gmail.com',
     token: 'fake-jwt-token',
 }
@@ -55,12 +51,13 @@ describe('registerUser controller', () => {
         const handler = registerUser(mockAuthService)
         await handler(req, res, next)
 
-        expect(mockAuthService.register).toHaveBeenCalledWith(
-            'John Doe',
-            'john@gmail.com',
-            '1234567890',
-            'password123'
-        )
+        expect(mockAuthService.register).toHaveBeenCalledWith({
+            email: 'john@gmail.com',
+            name: 'John Doe',
+            password: 'password123',
+            phone: '1234567890',
+            role: 'cashier',
+        })
         expect(res.status).toHaveBeenCalledWith(200)
         expect(mockJson).toHaveBeenCalledWith(mockUser)
     })

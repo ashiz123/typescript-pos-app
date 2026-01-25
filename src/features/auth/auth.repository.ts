@@ -1,24 +1,13 @@
-import { IUser } from './interfaces/authInterface.js'
+import { IUserDocument, IUserProps } from './interfaces/authInterface.js'
 import { IAuthRepository } from './interfaces/authInterface.js'
 import User from './auth.model.js'
 import { isMongoDuplicateKeyError } from '../../errors/guard.js'
 import { DuplicateEntry } from '../../errors/httpErrors.js'
 
 export class AuthRepository implements IAuthRepository {
-    async createUser(
-        name: string,
-        email: string,
-        phone: string,
-        password: string
-    ): Promise<IUser> {
+    async createUser(data: IUserProps): Promise<IUserDocument> {
         try {
-            const newUser = await User.create({
-                name,
-                email,
-                phone,
-                password,
-            })
-
+            const newUser = await User.create(data)
             return newUser
         } catch (err: unknown) {
             if (isMongoDuplicateKeyError(err)) {
@@ -28,7 +17,7 @@ export class AuthRepository implements IAuthRepository {
         }
     }
 
-    async findByEmail(email: string): Promise<IUser | null> {
+    async findByEmail(email: string): Promise<IUserDocument | null> {
         const user = await User.findOne({ email })
         return user
     }

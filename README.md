@@ -43,7 +43,7 @@ src
 └── utils/           # Shared utilities (JWT, Password hashing)
 
 ├── docker-compose.yml   # Infrastructure orchestration
-├── Dockerfile           # App containerization             # (As defined before)
+├── Dockerfile           # App containerization            
 └── tests/
 
 ----Project setup-----

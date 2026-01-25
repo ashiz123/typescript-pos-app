@@ -1,5 +1,7 @@
+import { Types } from 'mongoose'
+
 export type LoginResponseType = {
-    id: string
+    id?: Types.ObjectId
     email: string
     token: string
 }

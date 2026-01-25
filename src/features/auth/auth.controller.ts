@@ -9,13 +9,8 @@ export const registerUser =
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const data = RegisterSchemaValidation.parse(req.body)
-            const { name, email, phone, password } = data
-            const result = await authService.register(
-                name,
-                email,
-                phone,
-                password
-            )
+            // const { name, email, phone, password } = data
+            const result = await authService.register(data)
             res.status(200).json(result)
         } catch (error) {
             next(error)

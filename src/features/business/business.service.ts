@@ -31,6 +31,7 @@ export class BusinessService implements IBusinessService<BusinessProps> {
             ...(data as BusinessRequest),
             userId: new Types.ObjectId(data.userId),
         }
+
         const newBusiness = await this.repo.create(persistenceData)
         return newBusiness
     }
