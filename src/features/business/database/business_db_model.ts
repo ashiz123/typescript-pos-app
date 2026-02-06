@@ -7,7 +7,6 @@ import { BusinessProps } from '../business.model'
 
 export interface IBusinessDocument extends BusinessProps, Document {
     _id: Types.ObjectId
-    userId: Types.ObjectId
     createdAt?: Date
     updatedAt?: Date
     deletedAt?: Date

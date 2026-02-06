@@ -1,4 +1,14 @@
+import { ClientSession } from 'mongoose'
 import { RouteHandler } from '../../shared/baseType'
+import { ICrudController } from '../../shared/crudControllerInterface'
+import {
+    BusinessProps,
+    CreateBusinessDTO,
+    UpdateBusinessDTO,
+} from './business.model'
+import { IBusinessDocument } from './database/business_db_model'
+import { ICrudRepository } from '../../shared/crudRepository'
+import { ICrudService } from '../../shared/crudServiceInterface'
 
 export type BusinessController = {
     list: RouteHandler
@@ -14,10 +24,30 @@ export interface CreateBusinessRequest {
     websisste?: string
 }
 
-// export interface BusinessService<Business> {
-//     getAll(): Promise<Business[]>
-//     getById(id: string): Promise<Business>
-//     create(data: BusinessDTO): Promise<Business>
-//     update(id: string, data: BusinessDTO): Promise<Business | null>
-//     delete(id: string): Promise<boolean>
-// }
+export interface IBusinessRepository extends ICrudRepository<
+    IBusinessDocument,
+    CreateBusinessDTO,
+    UpdateBusinessDTO
+> {
+    filterByUserId(userId: string): Promise<IBusinessDocument[]>
+    filterByName(name: string): Promise<IBusinessDocument | null>
+    createWithSession(
+        data: CreateBusinessDTO,
+        session: ClientSession
+    ): Promise<IBusinessDocument>
+    findAndUpdateByToken(
+        token: string,
+        session: ClientSession
+    ): Promise<IBusinessDocument | null>
+}
+
+export interface IBusinessService<T> extends ICrudService<BusinessProps> {
+    filterBusinessByAuthUser(authId: string): Promise<T[]>
+    filterBusinessByName(name: string): Promise<T | null>
+    activateUser(token: string, userId: string, role: string): Promise<boolean>
+}
+
+export interface IBusinessController extends ICrudController {
+    activateForm: RouteHandler
+    updateActivate: RouteHandler
+}

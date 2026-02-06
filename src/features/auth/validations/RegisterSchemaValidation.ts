@@ -1,5 +1,5 @@
 import { z } from 'zod'
-const ROLES = ['admin', 'manager', 'cashier'] as const
+const ROLES = ['admin', 'owner'] as const
 
 export const RegisterSchemaValidation = z
     .object({
@@ -7,6 +7,6 @@ export const RegisterSchemaValidation = z
         email: z.email().toLowerCase(),
         phone: z.string().min(7).max(20),
         password: z.string().min(8).max(128),
-        role: z.enum(ROLES).optional().default('cashier'),
+        role: z.enum(ROLES).optional().default('owner'),
     })
     .strict()

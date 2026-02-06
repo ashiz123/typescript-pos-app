@@ -17,6 +17,7 @@
         "target": "ES2022",
         "module": "ESNext",
         "moduleResolution": "bundler",
+        "experimentalDecorators": true,
         "lib": ["ES2022"],
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
@@ -28,8 +29,8 @@
         "declaration": false,
         "noImplicitAny": false,
         "allowImportingTsExtensions": true,
-        "noEmit": true
+        "noEmit": true,
     },
     "include": ["src/**/*"],
-    "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+    "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
 }

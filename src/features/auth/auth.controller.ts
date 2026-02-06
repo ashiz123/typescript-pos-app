@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { type IAuthService } from './interfaces/authInterface.js'
+import { IUserProps, type IAuthService } from './interfaces/authInterface.js'
 import { RegisterSchemaValidation } from './validations/RegisterSchemaValidation.js'
 import { LoginSchemaValidation } from './validations/LoginSchemaValidation.js'
 import { logger } from '../../middlewares/logHandler.js'
@@ -10,7 +10,7 @@ export const registerUser =
         try {
             const data = RegisterSchemaValidation.parse(req.body)
             // const { name, email, phone, password } = data
-            const result = await authService.register(data)
+            const result = await authService.register(data as IUserProps)
             res.status(200).json(result)
         } catch (error) {
             next(error)

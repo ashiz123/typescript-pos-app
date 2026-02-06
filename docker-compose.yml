@@ -18,12 +18,10 @@ services:
         container_name: mongo_pos
         image: mongo:7
         ports:
-            - '27018:27017'
-        environment:
-            - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-            - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+            - '27017:27017' #host_post:container_port
         volumes:
-            - pos_mongo_data:/data/db
+            - mongo_data:/data/db
+        command: ['mongod', '--replSet', 'rs0', '--bind_ip_all']
 
     redis_pos:
         container_name: redis_pos
@@ -32,4 +30,10 @@ services:
             - '6380:6379'
 
 volumes:
-    pos_mongo_data:
+    mongo_data:
+
+        #environment: for mongo_pos removed
+        # ${MONGO_INITDB_ROOT_USERNAME}, ${MONGO_INITDB_ROOT_PASSWORD}, ${MONGO_INITDB_REPLICA_SET_NAME} should be exported first to use them in the environment variables
+        #- MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+        #- MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+        #- MONGO_INITDB_REPLICA_SET_NAME=${MONGO_INITDB_REPLICA_SET_NAME} to initialize the replica set

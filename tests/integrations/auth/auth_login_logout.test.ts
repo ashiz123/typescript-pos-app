@@ -9,6 +9,7 @@ describe.sequential('User login Integration test', () => {
         name: 'ramesh thapa',
         phone: '23333322222',
         password: 'ramesh123',
+        role: 'cashier',
     }
 
     const credentials = {

@@ -13,7 +13,7 @@ import { Roles, ROLE_PERMISSIONS } from '../utils/userPermission'
 export const hasPermission = (permissionName: string) => {
     return (req: Request, res: Response, next: NextFunction) => {
         const userRole = req.user?.role
-        console.log('user role', req.user)
+
         if (!userRole) {
             return next(
                 new ForbiddenError(
@@ -22,6 +22,12 @@ export const hasPermission = (permissionName: string) => {
             )
         }
 
+        //admin can access everything
+        if (userRole === 'admin') {
+            return next()
+        }
+
+        //other user type need permission
         const allowPermissions = ROLE_PERMISSIONS[userRole as Roles]
 
         if (allowPermissions && allowPermissions.includes(permissionName)) {

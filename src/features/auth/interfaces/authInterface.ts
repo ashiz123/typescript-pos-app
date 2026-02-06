@@ -1,19 +1,22 @@
-import { Document, HydratedDocument, Types } from 'mongoose'
+import { Document, Types } from 'mongoose'
 import { LoginResponseType } from '../types/LoginResponseType.type.js'
 
 export interface IUserProps {
     name: string
     email: string
     phone: string
-    password: string
-    role?: 'admin' | 'team-leader' | 'cashier' | 'manager' | 'employee'
-    businessId?: Types.ObjectId
+    password?: string
+    role: 'admin' | 'owner' | 'accountant' | 'cashier' | 'manager' | 'employee'
+    status: 'pending' | 'active' | 'disabled'
+    activationToken?: string
+    createdBy: string | Types.ObjectId
 }
 
-export type IUser = HydratedDocument<IUserProps>
+// export type IUser = HydratedDocument<IUserProps>
 
-export interface IUserDocument extends IUserProps, Document {
+export interface IUserDocument extends Omit<IUserProps, 'createdBy'>, Document {
     _id: Types.ObjectId
+    createdBy: Types.ObjectId
     createdAt: Date
     updatedAt: Date
 }
@@ -39,12 +42,14 @@ export type Payload = {
     sub: string
     email: string
     role: string | undefined
+    status: string
 }
 
 export interface JwtPayload {
     sub: string // user id
     email: string
-    role: 'user' | 'admin'
+    status: string
+    role: 'cashier' | 'admin' | 'manager' | 'employee'
     iat: number
     exp: number
     iss: string

@@ -3,12 +3,6 @@ import { IBusinessDocument } from './business_db_model'
 
 export const businessSchema = new Schema<IBusinessDocument>(
     {
-        userId: {
-            type: Schema.Types.ObjectId,
-            required: true,
-            trim: true,
-        },
-
         name: {
             type: String,
             required: true,
@@ -40,6 +34,20 @@ export const businessSchema = new Schema<IBusinessDocument>(
             type: String,
             trim: true,
         },
+
+        status: {
+            type: String,
+            enum: ['pending', 'active', 'disabled'],
+            required: true,
+            default: 'pending',
+        },
+
+        activationToken: {
+            type: String,
+            trim: true,
+            required: false,
+        },
+
         deletedAt: {
             type: Date,
             default: null,

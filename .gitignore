@@ -4,7 +4,8 @@ node_modules/
 # Build output
 dist/
 build/
-
+src/unused
+SETUP.md
 # TypeScript
 *.tsbuildinfo
 
@@ -33,4 +34,3 @@ Thumbs.db
 
 # Jest coverage
 coverage/
-

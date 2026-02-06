@@ -1,5 +1,5 @@
 // load variables from .env
-import mongoose, { mongo } from 'mongoose'
+import mongoose from 'mongoose'
 import { logger } from '../middlewares/logHandler.js'
 
 class Database {

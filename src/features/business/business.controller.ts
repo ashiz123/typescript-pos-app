@@ -1,35 +1,50 @@
 import { Request, Response, NextFunction } from 'express'
-import { ICrudService } from '../../shared/baseService'
 import { BusinessProps } from './business.model'
 import { businessService } from './business.service'
-import { ICrudController } from '../../shared/crudControllerInterface'
+import { IBusinessService } from './business.type'
 import { ApiResponse } from '../../types/apiResponseType'
 import {
     BusinessSchema,
     type BusinessRequest,
-} from '../auth/validations/BusinessSchemaValidation'
-import { NotFoundError } from '../../errors/httpErrors'
+} from './validations/BusinessSchemaValidation'
+import {
+    BadRequestError,
+    NotFoundError,
+    UnauthorizedError,
+} from '../../errors/httpErrors'
+import { businessActivationForm } from '../../utils/businessActivationHtml'
+import { activationSuccess } from '../../utils/businessActivationHtml'
+import { IBusinessController } from './business.type'
+import { injectable, inject } from 'tsyringe'
+import { TOKENS } from '../../config/tokens'
 
 export interface AuthRequest extends Request {
-    user?: { userId: string; email: string }
+    user?: { userId: string; email: string; role?: string }
 }
 
-export class BusinessController implements ICrudController {
-    private readonly businessService: ICrudService<BusinessProps>
-
-    constructor(businessService: ICrudService<BusinessProps>) {
-        this.businessService = businessService
-    }
+@injectable()
+export class BusinessController implements IBusinessController {
+    constructor(
+        @inject(TOKENS.BUSINESS_SERVICE)
+        private readonly businessService: IBusinessService<BusinessProps>
+    ) {}
 
     create = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            if (!req.user?.userId) {
-                throw new Error('Loggedin user not found')
+            if (!req.user) {
+                throw new UnauthorizedError('Logged in user not found')
             }
+
             const data: BusinessRequest = BusinessSchema.parse(req.body) //validation
-            const businessDataWithUser = { ...data, userId: req.user.userId }
+            const businessDataWithUser = {
+                ...data,
+                userId: req.user.userId,
+                email: req.user.email,
+                role: req.user.role,
+            }
             const newBusiness: BusinessProps =
                 await this.businessService.create(businessDataWithUser)
+            //request to admin to create the business
             const response: ApiResponse<BusinessProps> = {
                 success: true,
                 data: newBusiness,
@@ -110,6 +125,56 @@ export class BusinessController implements ICrudController {
                 message: 'Business deleted successfully',
             }
             res.status(200).json(response)
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    activateForm = (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { userId, token } = req.params
+
+            if (!token) {
+                throw new BadRequestError('Token is required')
+            }
+            res.send(businessActivationForm(token, userId))
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    updateActivate = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const { token, userId, role } = req.params
+
+            if (!token) {
+                throw new BadRequestError('Token is required')
+            }
+
+            const user = await this.businessService.activateUser(
+                token,
+                userId,
+                role
+            )
+
+            if (!user) {
+                throw new NotFoundError(
+                    'User not found or could not be activated'
+                )
+            }
+
+            const response: ApiResponse<string> = {
+                success: true,
+                data: 'Business activated successfully',
+                message: 'User activated successfully',
+            }
+            if (response.success) {
+                res.send(activationSuccess())
+            }
         } catch (error) {
             next(error)
         }

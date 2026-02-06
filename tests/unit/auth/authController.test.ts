@@ -17,6 +17,7 @@ const mockUser: IUserProps = {
     email: 'john@gmail.com',
     phone: '1234567890',
     password: 'hashedpassword',
+    status: 'pending',
 }
 
 const mockLoginResponse: LoginResponseType = {

@@ -1,6 +1,7 @@
 import { Schema } from 'mongoose'
 import { IUserDocument } from '../features/auth/interfaces/authInterface.js'
 import bcrypt from 'bcryptjs'
+import { hashPassword } from '../utils/password.js'
 
 export const UserSchema: Schema<IUserDocument> = new Schema(
     {
@@ -26,18 +27,41 @@ export const UserSchema: Schema<IUserDocument> = new Schema(
 
         role: {
             type: String,
-            enum: ['admin', 'team-leader', 'manager', 'employee', 'cashier'],
-            default: 'admin',
+            enum: [
+                'admin',
+                'manager',
+                'owner',
+                'cashier',
+                'accountant',
+                'employee',
+            ],
+            required: true,
+            trim: true,
         },
 
         password: {
             type: String,
-            required: true,
+            required: false,
         },
 
-        businessId: {
+        //not necessary
+        activationToken: {
+            type: String,
+            required: false,
+        },
+
+        //not necessary
+        status: {
+            type: String,
+            enum: ['pending', 'active', 'disabled'],
+            required: true,
+            default: 'pending',
+        },
+
+        createdBy: {
             type: Schema.Types.ObjectId,
             required: false,
+            ref: 'User',
         },
     },
     {
@@ -45,10 +69,12 @@ export const UserSchema: Schema<IUserDocument> = new Schema(
     }
 )
 //hashing the password
-UserSchema.pre<IUser>('save', async function (next) {
+UserSchema.pre<IUserDocument>('save', async function (next) {
     if (!this.isModified('password')) return next()
-    const salt = await bcrypt.genSalt(10)
-    this.password = await bcrypt.hash(this.password, salt)
+
+    if (this.password) {
+        this.password = await hashPassword(this.password)
+    }
     next()
 })
 

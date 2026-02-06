@@ -14,7 +14,12 @@ router.get(
     hasPermission('edit_product'),
     categoryController.getAllCatgories
 )
-router.post('/create', authHandler, categoryController.createCategory)
+router.post(
+    '/create',
+    authHandler,
+    hasPermission('edit_product'),
+    categoryController.createCategory
+)
 router.put('/update/:id', categoryController.updateCategory)
 router.delete('/delete/:id', categoryController.deleteCategory)
 

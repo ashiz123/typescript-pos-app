@@ -23,6 +23,12 @@ export const authHandler = async (
             userId: payload.sub,
             email: payload.email,
             role: payload.role,
+            status: payload.status,
+        }
+
+        if (req.user.status === 'pending') {
+            res.status(403).json({ message: 'User is inactive yet' })
+            return
         }
 
         next()

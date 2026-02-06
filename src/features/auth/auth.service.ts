@@ -55,14 +55,20 @@ export class AuthService implements IAuthService {
             )
         }
 
+        if (!user.password) {
+            throw new UnauthorizedError('User is not activated yet')
+        }
+
         const isValid = await this.comparePassword(password, user.password)
         if (!isValid) {
             throw new UnauthorizedError('Invalid credentials')
         }
+
         const payload: Payload = {
             sub: String(user._id),
             email: user.email,
             role: user.role,
+            status: user.status,
         }
 
         const token = await signIn(payload)

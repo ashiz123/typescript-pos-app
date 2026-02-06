@@ -61,6 +61,7 @@ describe('Register service', () => {
         email: 'john@gmail.com',
         phone: '1234567890',
         password: 'hashedpassword',
+        status: 'pending',
     }
 
     it('should create new user successfully', async () => {

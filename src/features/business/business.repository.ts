@@ -1,18 +1,14 @@
-import { ICrudRepository, CrudRepository } from '../../shared/crudRepository'
+import { injectable } from 'tsyringe'
+import { ClientSession } from 'mongoose'
+import { CrudRepository } from '../../shared/crudRepository'
 import { CreateBusinessDTO, UpdateBusinessDTO } from './business.model'
 import { BusinessModel, IBusinessDocument } from './database/business_db_model'
+import { IBusinessRepository } from './business.type'
 
 //interface
-export interface IBusinessRepository extends ICrudRepository<
-    IBusinessDocument,
-    CreateBusinessDTO,
-    UpdateBusinessDTO
-> {
-    filterByUserId(userId: string): Promise<IBusinessDocument[]>
-    filterByName(name: string): Promise<IBusinessDocument | null>
-}
 
 //class
+@injectable()
 export class BusinessRepository
     extends CrudRepository<
         IBusinessDocument,
@@ -32,4 +28,29 @@ export class BusinessRepository
     async filterByName(name: string): Promise<IBusinessDocument | null> {
         return this.model.findOne({ name: { $regex: name, $options: 'i' } })
     }
+
+    async createWithSession(
+        data: CreateBusinessDTO,
+        session: ClientSession
+    ): Promise<IBusinessDocument> {
+        console.log(data)
+        const [business] = await this.model.create([data], { session })
+        return business
+    }
+
+    async findAndUpdateByToken(
+        token: string,
+        session: ClientSession
+    ): Promise<IBusinessDocument | null> {
+        return await this.model.findOneAndUpdate(
+            { activationToken: token },
+            {
+                status: 'active',
+                $unset: { activationToken: '' },
+            },
+            { new: true, session } //return updated doc
+        )
+    }
 }
+
+export const businessRepository = new BusinessRepository()

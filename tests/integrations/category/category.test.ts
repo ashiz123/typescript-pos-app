@@ -19,7 +19,8 @@ describe('Category test', () => {
         email: 'testing@gmail.com',
         phone: '2342342341',
         password: 'testing123',
-    }
+        status: 'active',
+    } as const
 
     beforeAll(async () => {
         await authService.register(newUser)

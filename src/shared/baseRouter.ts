@@ -5,7 +5,8 @@ import { ICrudController } from './crudControllerInterface'
 type OptionType = {
     exclude: string[]
     middleware: RouteHandler[]
-    additionalRoute?: [RouteConfig]
+    additionalRoute?: RouteConfig[]
+    commonPathPrefix?: string
 }
 
 export function createCrudRoutes(
@@ -13,7 +14,12 @@ export function createCrudRoutes(
     options: OptionType
 ): Router {
     const router = express.Router()
-    const { middleware, exclude, additionalRoute } = options
+    const {
+        middleware,
+        exclude,
+        additionalRoute,
+        commonPathPrefix = '',
+    } = options
 
     const routes: RouteConfig[] = [
         {
@@ -54,7 +60,11 @@ export function createCrudRoutes(
 
     routes.forEach((route) => {
         if (!exclude.includes(route.name)) {
-            router[route.method](route.path, ...middleware, route.handler)
+            router[route.method](
+                commonPathPrefix + route.path,
+                ...middleware,
+                route.handler
+            )
         }
     })
 
