@@ -1,8 +1,7 @@
 import mongoose, { Document, Model, Types } from 'mongoose'
 import { ProductSchema } from './product.schema'
 
-export interface IProduct {
-    sku: string
+interface ProductBase {
     name: string
     description?: string
     price: number
@@ -11,17 +10,22 @@ export interface IProduct {
     isActive: boolean
 }
 
-export interface CreateProductDTO extends IProduct {
-    //create with string categoryId
-    categoryId: string
+export interface IProduct extends ProductBase {
+    sku: string
 }
 
-export type UpdateProductDTO = Partial<Omit<CreateProductDTO, 'categoryId'>> //the categoryId in product is not editable.
+export interface CreateProductDTO extends ProductBase {
+    //create with string categoryId
+    categoryId: string
+    businessId: string
+}
 
-export interface IProductDocument //database take these data as well
-    extends Omit<IProduct, 'categoryId'>, Document {
+export type UpdateProductDTO = Partial<ProductBase>
+
+export interface IProductDocument extends IProduct, Document {
     _id: Types.ObjectId
     categoryId: Types.ObjectId
+    businessId: Types.ObjectId
     createdAt: Date
     updatedAt: Date
 }

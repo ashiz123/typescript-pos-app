@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { ICrudService } from '../../shared/baseService'
+import { ICrudService } from '../../shared/crudServiceInterface'
 import { ICategory } from './category.model'
 import {
     CategoryRequest,

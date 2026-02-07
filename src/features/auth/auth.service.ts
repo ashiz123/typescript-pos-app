@@ -12,9 +12,15 @@ import {
     IUserProps,
 } from './interfaces/authInterface.js'
 import { signIn } from '../../utils/jwtService.js'
-import { type LoginResponseType } from './types/LoginResponseType.type.js'
-import { logger } from '../../middlewares/logHandler.js'
+import {
+    LoginFirstResponse,
+    LoginWithSelectBusinessDTO,
+    PreAuthType,
+    UserBusiness,
+    type LoginResponse,
+} from './types/LoginResponse.type.js'
 import { RedisClientType } from 'redis'
+import { IUserBusinessRepository } from '../userBusiness/interfaces/userBusiness.interface.js'
 
 export class AuthService implements IAuthService {
     private readonly authRepository: IAuthRepository
@@ -23,11 +29,18 @@ export class AuthService implements IAuthService {
         hashedPassword: string
     ) => Promise<boolean>
     private redis: RedisClientType
+    private userBusinessRepository: IUserBusinessRepository
 
-    constructor(authRepository: IAuthRepository, comparePassword, redisClient) {
+    constructor(
+        authRepository: IAuthRepository,
+        comparePassword,
+        redisClient,
+        userBusinessRepository: IUserBusinessRepository
+    ) {
         this.authRepository = authRepository
         this.comparePassword = comparePassword
         this.redis = redisClient
+        this.userBusinessRepository = userBusinessRepository
     }
 
     async register(data: IUserProps): Promise<IUserDocument> {
@@ -44,7 +57,7 @@ export class AuthService implements IAuthService {
         return await this.authRepository.createUser(data)
     }
 
-    async login(email: string, password: string): Promise<LoginResponseType> {
+    async login(email: string, password: string): Promise<LoginFirstResponse> {
         const user: IUserDocument | null =
             await this.authRepository.findByEmail(email)
         console.log(user)
@@ -64,21 +77,70 @@ export class AuthService implements IAuthService {
             throw new UnauthorizedError('Invalid credentials')
         }
 
-        const payload: Payload = {
-            sub: String(user._id),
+        const data = await this.userBusinessRepository.getUserBusinesses(
+            user.id
+        )
+
+        if (!data || data.length === 0) {
+            throw new NotFoundError(
+                'User has no businesses, You are not authorized to login',
+                'authService.loginUser'
+            )
+        }
+
+        //MAPPING FROM DOCUMENT TYPE TO USERBUSINESS TYPE
+        const businesses: UserBusiness[] = data.map((b) => ({
+            businessId: b.businessId.toString(),
+            role: b.role,
+            userStatus: b.userStatus,
+        }))
+
+        const preAuthData: PreAuthType = {
+            sub: user.id,
             email: user.email,
-            role: user.role,
+            type: 'preAuth',
+        }
+
+        const token = await signIn(preAuthData)
+
+        return {
+            token: token,
             status: user.status,
+            businesses,
+        }
+    }
+
+    async loginWithSelectBusiness(
+        data: LoginWithSelectBusinessDTO
+    ): Promise<LoginResponse> {
+        const userBusiness = await this.userBusinessRepository.getUserBusiness(
+            data.userId,
+            data.businessId
+        )
+
+        if (!userBusiness) {
+            throw new NotFoundError(
+                'User has no businesses, You are not authorized to login',
+                'authService.loginUser'
+            )
+        }
+
+        const payload: Payload = {
+            sub: data.userId,
+            email: data.email,
+            role: userBusiness.role,
+            status: userBusiness.userStatus,
+            businessId: data.businessId,
+            type: 'access',
         }
 
         const token = await signIn(payload)
         await this.redis.set(`session:${token}`, JSON.stringify(payload), {
             EX: 3600,
         })
-        logger.info(await this.redis.get(`session:${token}`))
+
         return {
-            id: user._id,
-            email: user.email,
+            email: data.email,
             token: token,
         }
     }

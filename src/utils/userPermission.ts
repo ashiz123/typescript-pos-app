@@ -18,6 +18,7 @@ const OWNER_PERMISSIONS = [
     ...MANAGER_PERMISSIONS,
     'manage_users',
     'manage_business',
+    'create_business',
     'edit_settings',
     'view_reports',
 ] as const

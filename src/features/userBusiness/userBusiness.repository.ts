@@ -7,6 +7,7 @@ import {
     AssignUserDTO,
     // UpdateUserRoleDTO,
 } from './interfaces/userBusiness.interface.js'
+import { IUserDocument, IUserProps } from '../auth/interfaces/authInterface.js'
 
 @injectable()
 export class UserBusinessRepository implements IUserBusinessRepository {
@@ -87,21 +88,21 @@ export class UserBusinessRepository implements IUserBusinessRepository {
     async getUserBusiness(
         userId: string,
         businessId: string
-    ): Promise<IUserBusinessDocument[] | null> {
-        const userBusinesses = await this.model.find({
+    ): Promise<IUserBusinessDocument | null> {
+        const userBusinesses = await this.model.findOne({
             userId: new Types.ObjectId(userId),
             businessId: new Types.ObjectId(businessId),
-            isActive: true,
+            userStatus: 'active',
         })
 
-        return userBusinesses.length > 0 ? userBusinesses : null
+        return userBusinesses
     }
 
     async checkUserExist(businessId: string, userId: string): Promise<boolean> {
         const count = await this.model.countDocuments({
             userId: new Types.ObjectId(userId),
             businessId: new Types.ObjectId(businessId),
-            isActive: true,
+            userStatus: 'active',
         })
 
         return count > 0
@@ -114,7 +115,7 @@ export class UserBusinessRepository implements IUserBusinessRepository {
         const userBusiness = await this.model.findOne({
             userId: new Types.ObjectId(userId),
             businessId: new Types.ObjectId(businessId),
-            isActive: true,
+            userStatus: 'active',
         })
 
         return userBusiness ? userBusiness.role : null
@@ -125,7 +126,7 @@ export class UserBusinessRepository implements IUserBusinessRepository {
             {
                 userId: new Types.ObjectId(userId),
                 businessId: new Types.ObjectId(businessId),
-                isActive: true,
+                userStatus: 'active',
             },
             {
                 isActive: false,
@@ -138,13 +139,15 @@ export class UserBusinessRepository implements IUserBusinessRepository {
         return !!result
     }
 
-    async getBusinessUsers(
-        businessId: string
-    ): Promise<IUserBusinessDocument[]> {
-        const users = await this.model.find({
-            businessId: new Types.ObjectId(businessId),
-            isActive: true,
-        })
+    async getBusinessUsers(businessId: string): Promise<IUserDocument[]> {
+        const businessUsers = await this.model
+            .find({
+                businessId,
+                userStatus: 'active',
+            })
+            .populate<{ userId: IUserDocument }>('userId')
+
+        const users = businessUsers.map((ub) => ub.userId)
 
         return users
     }
@@ -152,7 +155,7 @@ export class UserBusinessRepository implements IUserBusinessRepository {
     async getUserBusinesses(userId: string): Promise<IUserBusinessDocument[]> {
         const businesses = await this.model.find({
             userId: new Types.ObjectId(userId),
-            isActive: true,
+            userStatus: 'active',
         })
 
         return businesses

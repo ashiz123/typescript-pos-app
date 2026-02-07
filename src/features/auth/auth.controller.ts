@@ -37,8 +37,41 @@ export const loginUser =
 export const getAuthUser =
     () => async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const loggedInUser = await req.user
+            const loggedInUser = req.user
             res.status(200).json({ loggedInUser })
+        } catch (error) {
+            console.log(error)
+            next(error)
+        }
+    }
+
+export const loginUserWithBusinessId =
+    (authService: IAuthService) =>
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const { businessId } = req.body
+
+            if (!req.user) {
+                throw new Error('user not found')
+            }
+            const { userId, email } = req.user
+
+            console.log('userbusiness', userId, businessId)
+
+            const data = {
+                userId,
+                email,
+                businessId,
+            }
+
+            const result = await authService.loginWithSelectBusiness(data)
+
+            res.status(200).json({
+                success: true,
+                message: 'User logged in successfully with business',
+                data: result,
+            })
+            return
         } catch (error) {
             console.log(error)
             next(error)

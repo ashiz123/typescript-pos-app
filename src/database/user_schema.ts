@@ -3,6 +3,7 @@ import { IUserDocument } from '../features/auth/interfaces/authInterface.js'
 import bcrypt from 'bcryptjs'
 import { hashPassword } from '../utils/password.js'
 
+//UserClass and AuthClass is use same schema
 export const UserSchema: Schema<IUserDocument> = new Schema(
     {
         name: {

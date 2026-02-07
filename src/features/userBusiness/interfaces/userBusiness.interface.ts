@@ -1,4 +1,5 @@
 import { ClientSession, Document, Model, Types } from 'mongoose'
+import { IUserDocument } from '../../auth/interfaces/authInterface'
 
 export type UserRole =
     | 'owner'
@@ -63,9 +64,9 @@ export interface IUserBusinessDocument extends IUserBusinessProps, Document {
     updatedAt: Date
 
     // Instance methods
-    hasPermission(permission: UserPermission): boolean
-    hasAnyPermission(permissions: UserPermission[]): boolean
-    hasAllPermissions(permissions: UserPermission[]): boolean
+    //     hasPermission(permission: UserPermission): boolean
+    //     hasAnyPermission(permissions: UserPermission[]): boolean
+    //     hasAllPermissions(permissions: UserPermission[]): boolean
 }
 
 export interface IUserBusinessModel extends Model<IUserBusinessDocument> {
@@ -93,12 +94,12 @@ export interface IUserBusinessRepository {
     getUserBusiness(
         userId: string,
         businessId: string
-    ): Promise<IUserBusinessDocument[] | null>
+    ): Promise<IUserBusinessDocument | null>
 
     checkUserExist(businessId: string, userId: string): Promise<boolean>
     getUserRole(userId: string, businessId: string): Promise<string | null>
     removeUser(userId: string, businessId: string): Promise<boolean>
-    getBusinessUsers(businessId: string): Promise<IUserBusinessDocument[]>
+    getBusinessUsers(businessId: string): Promise<IUserDocument[]>
     getUserBusinesses(userId: string): Promise<IUserBusinessDocument[]>
     findAndUpdateByUserIdWithSession(
         userId: string,

@@ -3,6 +3,7 @@ import { authHandler } from '../../middlewares/authHandler.js'
 import { hasPermission } from '../../middlewares/hasPermission.js'
 import { CategoryController } from './category.controller'
 import { categoryService } from './category.service'
+import { userAuthorityBusiness } from '../../middlewares/businessAccess.js'
 
 const categoryController = new CategoryController(categoryService)
 
@@ -17,6 +18,7 @@ router.get(
 router.post(
     '/create',
     authHandler,
+    userAuthorityBusiness,
     hasPermission('edit_product'),
     categoryController.createCategory
 )

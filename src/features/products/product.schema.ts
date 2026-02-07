@@ -33,14 +33,20 @@ export const ProductSchema: Schema<IProductDocument> = new Schema(
             type: Number,
             required: true,
         },
-        categoryId: {
-            type: Schema.Types.ObjectId,
-            reference: 'Category',
-            required: true,
-        },
+
         isActive: {
             type: Boolean,
             default: true,
+        },
+        categoryId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Category',
+            required: true,
+        },
+        businessId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Business',
+            required: true,
         },
     },
     { timestamps: true, id: true }

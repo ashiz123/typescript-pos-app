@@ -8,7 +8,7 @@ export const userAuthorityBusiness = async (
     next: NextFunction
 ) => {
     try {
-        const { businessId } = req.params
+        const businessId = req.params.businessId || req.body.businessId
 
         if (!req.user) {
             return next(new UnauthorizedError('User cannot access'))

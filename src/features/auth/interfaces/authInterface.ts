@@ -1,5 +1,9 @@
 import { Document, Types } from 'mongoose'
-import { LoginResponseType } from '../types/LoginResponseType.type.js'
+import {
+    LoginFirstResponse,
+    LoginResponse,
+    LoginWithSelectBusinessDTO,
+} from '../types/LoginResponse.type.js'
 
 export interface IUserProps {
     name: string
@@ -27,8 +31,11 @@ export interface IUserDocument extends Omit<IUserProps, 'createdBy'>, Document {
 
 export interface IAuthService {
     register(data: IUserProps): Promise<IUserDocument>
-    login(email: string, password: string): Promise<LoginResponseType>
+    login(email: string, password: string): Promise<LoginFirstResponse>
     logout(token: string): Promise<boolean>
+    loginWithSelectBusiness(
+        data: LoginWithSelectBusinessDTO
+    ): Promise<LoginResponse>
 }
 
 export interface IAuthRepository {
@@ -41,14 +48,18 @@ export interface IAuthRepository {
 export type Payload = {
     sub: string
     email: string
-    role: string | undefined
-    status: string
+    role?: string
+    businessId?: string
+    status?: string
+    type: string
 }
 
 export interface JwtPayload {
     sub: string // user id
     email: string
-    status: string
+    status?: string
+    type?: string
+    businessId?: string
     role: 'cashier' | 'admin' | 'manager' | 'employee'
     iat: number
     exp: number

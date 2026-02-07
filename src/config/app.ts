@@ -21,7 +21,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/business', businessRoutes)
 
 //secure this route with business
-app.use('/api/business/:businessId/categories/', categoryRoutes)
+app.use('/api/categories/', categoryRoutes)
 app.use('/api/product', productRoute)
 app.use('/api/user', userRoute)
 app.use('/api/userActivation', userActivationRoute)

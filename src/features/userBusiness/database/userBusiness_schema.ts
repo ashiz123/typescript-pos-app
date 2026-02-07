@@ -1,5 +1,5 @@
 import { Schema, Types } from 'mongoose'
-import { IUserBusinessDocument } from '../interfaces/userBusinessInterface.js'
+import { IUserBusinessDocument } from '../interfaces/userBusiness.interface'
 
 export const UserBusinessSchema: Schema<IUserBusinessDocument> = new Schema(
     {

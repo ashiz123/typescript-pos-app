@@ -35,6 +35,8 @@ export class BusinessController implements IBusinessController {
                 throw new UnauthorizedError('Logged in user not found')
             }
 
+            console.log('new auth', req.user)
+
             const data: BusinessRequest = BusinessSchema.parse(req.body) //validation
             const businessDataWithUser = {
                 ...data,

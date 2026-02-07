@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from 'express'
-import { verifyToken } from '../utils/jwtService.js'
+import { verifyToken } from '../utils/jwtService'
+import { logger } from './logHandler'
 
-export const authHandler = async (
+export const authWithBusinessHandler = async (
     req: Request,
     res: Response,
     next: NextFunction
 ): Promise<void> => {
-    //validation
-
     const authHeader = req.headers['authorization']
     if (!authHeader) {
         res.status(401).json({ message: 'User not authorized, Token required' })
@@ -16,26 +15,21 @@ export const authHandler = async (
 
     const token = authHeader.split(' ')[1]
     if (!token) throw new Error('No token provided')
-    console.log(token)
 
     try {
         const payload = await verifyToken(token)
-        console.log(payload)
-        req.user = {
-            userId: payload.sub,
-            email: payload.email,
-            type: payload.type,
-        }
 
-        if (req.user.status === 'pending') {
-            res.status(403).json({ message: 'User is inactive yet' })
+        if (!payload) {
+            res.status(401).json({ message: 'Unauthorized' })
             return
         }
 
+        console.log(payload)
+
         next()
-    } catch (err) {
-        console.log(err)
-        res.status(401).json({ message: 'Invalid or expired token' })
+    } catch (error) {
+        logger.info(error)
+        res.status(401).json({ message: 'Unauthorized' })
         return
     }
 }
