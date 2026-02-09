@@ -16,11 +16,10 @@ export const authHandler = async (
 
     const token = authHeader.split(' ')[1]
     if (!token) throw new Error('No token provided')
-    console.log(token)
 
     try {
         const payload = await verifyToken(token)
-        console.log(payload)
+
         req.user = {
             userId: payload.sub,
             email: payload.email,

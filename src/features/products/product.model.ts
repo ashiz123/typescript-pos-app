@@ -15,7 +15,7 @@ export interface IProduct extends ProductBase {
 }
 
 export interface CreateProductDTO extends ProductBase {
-    //create with string categoryId
+    sku: string
     categoryId: string
     businessId: string
 }

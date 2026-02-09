@@ -24,7 +24,14 @@ export const authWithBusinessHandler = async (
             return
         }
 
-        console.log(payload)
+        req.user = {
+            userId: payload.sub,
+            email: payload.email,
+            type: payload.type,
+            status: payload.status,
+            businessId: payload.businessId,
+            role: payload.role,
+        }
 
         next()
     } catch (error) {

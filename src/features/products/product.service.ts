@@ -1,4 +1,4 @@
-import { ICrudService } from '../../shared/baseService'
+import { ICrudService } from '../../shared/crudServiceInterface'
 import {
     CreateProductDTO,
     IProduct,
@@ -31,7 +31,8 @@ export class ProductService implements IProductService {
     }
 
     create = async (data: CreateProductDTO): Promise<IProductDocument> => {
-        return this.repo.create(data)
+        const sku = this.repo.generateSKU()
+        return this.repo.create({ ...data, sku })
     }
 
     update = async (

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { ICrudController } from '../../shared/crudControllerInterface'
 import { IProductService, productService } from './product.service'
+import { AuthRequest } from '../business/business.controller'
 import {
     CreateProductSchema,
     ProductRequest,
@@ -9,6 +10,8 @@ import {
 } from './validations/createProduct.validation'
 import { ApiResponse } from '../../types/apiResponseType'
 import { IProduct } from './product.model'
+import { AuthRequestWithBusiness } from '../../shared/requestType'
+import { UnauthorizedError } from '../../errors/httpErrors'
 
 export class ProductController implements ICrudController {
     private productService: IProductService
@@ -55,13 +58,18 @@ export class ProductController implements ICrudController {
     }
 
     create = async (
-        req: Request,
+        req: AuthRequestWithBusiness,
         res: Response,
         next: NextFunction
     ): Promise<void> => {
         try {
+            if (!req.user) {
+                throw new UnauthorizedError('Logged in user not found')
+            }
             const data: ProductRequest = CreateProductSchema.parse(req.body)
-            const newProduct = await this.productService.create(data)
+            const { businessId } = req.user
+            const newProductData = { ...data, businessId }
+            const newProduct = await this.productService.create(newProductData)
             const response: ApiResponse<IProduct> = {
                 success: true,
                 data: newProduct,

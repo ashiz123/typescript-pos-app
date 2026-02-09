@@ -14,6 +14,7 @@ export interface IProductRepository extends ICrudRepository<
 > {
     filterProductByCategoryId(categoryId: string): Promise<IProduct[]>
     filterProductByDateRange(fromDate: Date, toDate: Date): Promise<IProduct[]>
+    generateSKU(prefix?: string): string
     // discountedProduct(): Promise<IProduct[]>
     // mostLikedProduct(): Promise<IProduct | null>
     // mostViewedProduct(): Promise<IProduct | null>
@@ -46,6 +47,12 @@ export class ProductRepository
             .lean()
             .sort({ createdAt: -1 })
             .exec()
+    }
+
+    generateSKU(prefix: string = 'SKU'): string {
+        const timestamp = Date.now().toString(36) // shorter
+        const random = Math.random().toString(36).substring(2, 6).toUpperCase()
+        return `${prefix}-${timestamp}-${random}`
     }
 }
 

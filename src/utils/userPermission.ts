@@ -8,9 +8,7 @@ const CASHIER_PERMISSIONS = [
 
 const MANAGER_PERMISSIONS = [
     ...CASHIER_PERMISSIONS,
-    'add_product',
-    'remove_product',
-    'edit_product',
+    'handle_product',
     'view_sales_reports',
 ] as const
 
