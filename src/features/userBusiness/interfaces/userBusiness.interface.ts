@@ -7,8 +7,14 @@ export type UserRole =
     | 'manager'
     | 'cashier'
     | 'accountant'
-    | 'employee'
+    | 'user'
     | 'viewer'
+
+export const UserStatus = {
+    PENDING: 'pending',
+    ACTIVE: 'active',
+    DISABLED: 'disabled',
+} as const
 
 export type UserPermission =
     | 'read'
@@ -49,7 +55,7 @@ export interface AssignUserDTO {
     businessId: string | Types.ObjectId
     role: string
     createdBy?: string | Types.ObjectId
-    userStatus?: 'pending' | 'active' | 'disabled'
+    userStatus: 'pending' | 'active' | 'disabled'
 }
 
 export interface UpdateUserRoleDTO {

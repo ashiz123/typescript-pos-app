@@ -15,6 +15,7 @@ export interface IProductRepository extends ICrudRepository<
     filterProductByCategoryId(categoryId: string): Promise<IProduct[]>
     filterProductByDateRange(fromDate: Date, toDate: Date): Promise<IProduct[]>
     generateSKU(prefix?: string): string
+    getProductByBusinessId(businessId: string): Promise<IProduct[]>
     // discountedProduct(): Promise<IProduct[]>
     // mostLikedProduct(): Promise<IProduct | null>
     // mostViewedProduct(): Promise<IProduct | null>
@@ -44,6 +45,14 @@ export class ProductRepository
                     $lte: toDate,
                 },
             })
+            .lean()
+            .sort({ createdAt: -1 })
+            .exec()
+    }
+
+    getProductByBusinessId(businessId: string): Promise<IProduct[]> {
+        return this.model
+            .find({ businessId: businessId })
             .lean()
             .sort({ createdAt: -1 })
             .exec()

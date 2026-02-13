@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { ICrudController } from '../../shared/crudControllerInterface'
 import { IProductService, productService } from './product.service'
-import { AuthRequest } from '../business/business.controller'
+
 import {
     CreateProductSchema,
     ProductRequest,
@@ -21,12 +21,22 @@ export class ProductController implements ICrudController {
     }
 
     list = async (
-        req: Request,
+        req: AuthRequestWithBusiness,
         res: Response,
         next: NextFunction
     ): Promise<void> => {
         try {
-            const productsData = await this.productService.getAll()
+            if (!req.user) {
+                throw new UnauthorizedError('Authorised user not found')
+            }
+
+            const { businessId } = req.user
+            if (!businessId) {
+                throw new UnauthorizedError('Unauthorized business')
+            }
+            const productsData =
+                await this.productService.getProductsByBusinessId(businessId)
+
             const response: ApiResponse<IProduct[]> = {
                 success: true,
                 data: productsData,

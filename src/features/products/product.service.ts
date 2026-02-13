@@ -13,6 +13,7 @@ export interface IProductService extends ICrudService<IProduct> {
         fromDate: Date,
         toDate: Date
     ): Promise<IProduct[] | null>
+    getProductsByBusinessId(businessId: string): Promise<IProduct[]>
 }
 
 export class ProductService implements IProductService {
@@ -28,6 +29,13 @@ export class ProductService implements IProductService {
 
     getAll = async (): Promise<IProductDocument[]> => {
         return this.repo.findAll()
+    }
+
+    getProductsByBusinessId = async (
+        businessId: string
+    ): Promise<IProduct[]> => {
+        const products = await this.repo.getProductByBusinessId(businessId)
+        return products
     }
 
     create = async (data: CreateProductDTO): Promise<IProductDocument> => {

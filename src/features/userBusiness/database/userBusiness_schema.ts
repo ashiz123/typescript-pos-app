@@ -25,11 +25,10 @@ export const UserBusinessSchema: Schema<IUserBusinessDocument> = new Schema(
                 'manager',
                 'cashier',
                 'accountant',
-                'employee',
+                'user',
                 'viewer',
             ],
             required: [true, 'Role is required'],
-            default: 'employee',
         },
 
         userStatus: {

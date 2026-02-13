@@ -52,11 +52,10 @@ export const UserSchema: Schema<IUserDocument> = new Schema(
         },
 
         //not necessary
-        status: {
-            type: String,
-            enum: ['pending', 'active', 'disabled'],
+        new: {
+            type: Boolean,
+            default: true,
             required: true,
-            default: 'pending',
         },
 
         createdBy: {

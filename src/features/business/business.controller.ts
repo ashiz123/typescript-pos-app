@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { BusinessProps } from './business.model'
-import { businessService } from './business.service'
 import { IBusinessService } from './business.type'
+import { IUserService } from '../users/user.type'
 import { ApiResponse } from '../../types/apiResponseType'
 import {
     BusinessSchema,
@@ -17,6 +17,7 @@ import { activationSuccess } from '../../utils/businessActivationHtml'
 import { IBusinessController } from './business.type'
 import { injectable, inject } from 'tsyringe'
 import { TOKENS } from '../../config/tokens'
+import { UserService } from '../users/user.service'
 
 export interface AuthRequest extends Request {
     user?: { userId: string; email: string; role?: string }
@@ -26,7 +27,9 @@ export interface AuthRequest extends Request {
 export class BusinessController implements IBusinessController {
     constructor(
         @inject(TOKENS.BUSINESS_SERVICE)
-        private readonly businessService: IBusinessService<BusinessProps>
+        private readonly businessService: IBusinessService<BusinessProps>,
+        @inject(TOKENS.USER_SERVICE)
+        private readonly userService: IUserService
     ) {}
 
     create = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -35,14 +38,11 @@ export class BusinessController implements IBusinessController {
                 throw new UnauthorizedError('Logged in user not found')
             }
 
-            console.log('new auth', req.user)
-
             const data: BusinessRequest = BusinessSchema.parse(req.body) //validation
             const businessDataWithUser = {
                 ...data,
                 userId: req.user.userId,
                 email: req.user.email,
-                role: req.user.role,
             }
             const newBusiness: BusinessProps =
                 await this.businessService.create(businessDataWithUser)
@@ -151,7 +151,13 @@ export class BusinessController implements IBusinessController {
         next: NextFunction
     ): Promise<void> => {
         try {
-            const { token, userId, role } = req.params
+            const { token, userId } = req.params
+
+            const userData = await this.userService.getUserById(userId)
+
+            if (!userData) {
+                throw new NotFoundError('User not found in database')
+            }
 
             if (!token) {
                 throw new BadRequestError('Token is required')
@@ -160,7 +166,7 @@ export class BusinessController implements IBusinessController {
             const user = await this.businessService.activateUser(
                 token,
                 userId,
-                role
+                userData.email
             )
 
             if (!user) {
@@ -182,5 +188,3 @@ export class BusinessController implements IBusinessController {
         }
     }
 }
-
-export const businessController = new BusinessController(businessService)

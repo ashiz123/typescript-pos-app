@@ -4,6 +4,7 @@ import { container } from 'tsyringe'
 import { IBusinessController } from './business.type'
 import { TOKENS } from '../../config/tokens'
 import { authWithBusinessHandler } from '../../middlewares/authWithBusinessHandler'
+import { authHandler } from '../../middlewares/authHandler'
 
 export const businessController = container.resolve<IBusinessController>(
     TOKENS.BUSINESS_CONTROLLER
@@ -11,5 +12,5 @@ export const businessController = container.resolve<IBusinessController>(
 
 export default createCrudRoutes(businessController, {
     exclude: [],
-    middleware: [authWithBusinessHandler, hasPermission('create_business')],
+    middleware: [authHandler],
 })

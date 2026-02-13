@@ -19,7 +19,6 @@ const userValidation = z
         phone: PHONE_PATTERN,
         password: z.string().optional(),
         status: z.enum(ACCOUNT_STATUS).default('pending'),
-        businessId: objectIdSchema,
     })
     .strict()
 

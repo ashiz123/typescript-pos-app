@@ -29,9 +29,10 @@ export const ProductSchema: Schema<IProductDocument> = new Schema(
             type: Number,
             required: true,
         },
-        stockQuantity: {
-            type: Number,
-            required: true,
+        stockType: {
+            type: String,
+            enum: ['stocked', 'composite'],
+            default: 'stocked',
         },
 
         isActive: {

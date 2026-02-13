@@ -11,7 +11,7 @@ export interface IUserProps {
     phone: string
     password?: string
     role: 'admin' | 'owner' | 'accountant' | 'cashier' | 'manager' | 'employee'
-    status: 'pending' | 'active' | 'disabled'
+    new: boolean
     activationToken?: string
     createdBy: string | Types.ObjectId
 }

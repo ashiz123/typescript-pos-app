@@ -4,6 +4,7 @@ import { injectable } from 'tsyringe'
 import User from '../auth/auth.model'
 import { IUserDocument } from '../auth/interfaces/authInterface'
 import { CreateUserDTO, IUserRepository, UpdateUserDTO } from './user.type'
+import { ConflictError } from '../../errors/httpErrors'
 
 @injectable()
 export class UserRepository
@@ -40,11 +41,24 @@ export class UserRepository
     async createUserWithSession(
         userData: CreateUserDTO,
         session: ClientSession
-    ): Promise<IUserDocument> {
-        const [employee] = await this.model.create([userData], {
-            session,
-        })
-        return employee
+    ): Promise<{ user: IUserDocument; newUser: boolean }> {
+        const result = await this.model.findOneAndUpdate(
+            { email: userData.email },
+            {
+                $setOnInsert: userData,
+            },
+            {
+                upsert: true,
+                new: true,
+                session,
+                includeResultMetadata: true, //raw data
+            }
+        )
+
+        return {
+            user: result.value!,
+            newUser: !!result.lastErrorObject?.upserted,
+        }
     }
 }
 

@@ -44,7 +44,11 @@ export interface IBusinessRepository extends ICrudRepository<
 export interface IBusinessService<T> extends ICrudService<BusinessProps> {
     filterBusinessByAuthUser(authId: string): Promise<T[]>
     filterBusinessByName(name: string): Promise<T | null>
-    activateUser(token: string, userId: string, role: string): Promise<boolean>
+    activateUser(
+        token: string,
+        userId: string,
+        userEmail: string
+    ): Promise<boolean>
 }
 
 export interface IBusinessController extends ICrudController {

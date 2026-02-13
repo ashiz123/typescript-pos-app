@@ -2,6 +2,7 @@ import app from './config/app.js'
 import Database from './config/databaseConnection.js'
 import { connectRedis } from './config/redisConnection.js'
 import { logger } from './middlewares/logHandler.js'
+import '../src/core/notification.observer.js'
 
 async function bootstrap() {
     try {

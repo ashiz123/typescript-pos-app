@@ -26,11 +26,6 @@ export const authHandler = async (
             type: payload.type,
         }
 
-        if (req.user.status === 'pending') {
-            res.status(403).json({ message: 'User is inactive yet' })
-            return
-        }
-
         next()
     } catch (err) {
         console.log(err)

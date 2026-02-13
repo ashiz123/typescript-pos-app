@@ -9,7 +9,7 @@ export default createCrudRoutes(userController, {
             name: 'user_activate',
             method: 'get',
             path: '/:businessId/:token',
-            handler: userController.activateForm,
+            handler: userController.activateFormWithPassword,
         },
         {
             name: 'update_user_Activate',

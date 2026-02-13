@@ -13,7 +13,6 @@ export type UserBusiness = {
 
 export type LoginFirstResponse = {
     token: string
-    status: string
     businesses: UserBusiness[]
 }
 

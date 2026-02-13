@@ -12,10 +12,6 @@ const ProductSchema = z
         description: z.string().optional(),
         price: z.number().positive('Price should be all positive'),
         costPrice: z.number().positive('Cost price should be positive value'),
-        stockQuantity: z
-            .number()
-            .int()
-            .nonnegative('Stock value should be at least 1'),
         isActive: z.boolean().default(true),
     })
     .strict()

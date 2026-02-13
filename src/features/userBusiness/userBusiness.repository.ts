@@ -24,8 +24,8 @@ export class UserBusinessRepository implements IUserBusinessRepository {
         const userBusinessData = {
             userId: new Types.ObjectId(data.userId),
             businessId: new Types.ObjectId(data.businessId),
-            role: data.role,
             userStatus: data.userStatus,
+            role: data.role,
             startDate: new Date(),
             createdBy: data.createdBy
                 ? new Types.ObjectId(data.createdBy)
@@ -43,7 +43,7 @@ export class UserBusinessRepository implements IUserBusinessRepository {
         userId: string,
         role: string,
         businessId: string,
-        session: ClientSession
+        session?: ClientSession
     ): Promise<IUserBusinessDocument | null> {
         console.log('data', userId, businessId)
         const updateUser = await this.model.findOneAndUpdate(
@@ -53,7 +53,7 @@ export class UserBusinessRepository implements IUserBusinessRepository {
                 userStatus: 'pending',
             },
             { userStatus: 'active', role: role },
-            { new: true, session }
+            { new: true, ...(session ? { session } : {}) }
         )
         return updateUser
     }

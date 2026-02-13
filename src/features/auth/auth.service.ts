@@ -81,12 +81,12 @@ export class AuthService implements IAuthService {
             user.id
         )
 
-        if (!data || data.length === 0) {
-            throw new NotFoundError(
-                'User has no businesses, You are not authorized to login',
-                'authService.loginUser'
-            )
-        }
+        // if (!data || data.length === 0) {
+        //     throw new NotFoundError(
+        //         'Accept you business first and try login',
+        //         'authService.loginUser'
+        //     )
+        // }
 
         //MAPPING FROM DOCUMENT TYPE TO USERBUSINESS TYPE
         const businesses: UserBusiness[] = data.map((b) => ({
@@ -105,7 +105,6 @@ export class AuthService implements IAuthService {
 
         return {
             token: token,
-            status: user.status,
             businesses,
         }
     }

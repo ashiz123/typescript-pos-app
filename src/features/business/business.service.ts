@@ -5,12 +5,15 @@ import { BusinessProps, CreateBusinessDTO } from './business.model'
 import { IUserBusinessRepository } from '../userBusiness/interfaces/userBusiness.interface'
 import { userBusinessRepository } from '../userBusiness/userBusiness.repository'
 import { createToken, hashToken } from '../../utils/token'
-import { sendEmail } from '../../utils/sendEmail'
+
 import { IBusinessDocument } from './database/business_db_model'
 import { IUserRepository } from '../users/user.type'
 import { userRepository } from '../users/user.repository'
 import { inject, injectable } from 'tsyringe'
 import { TOKENS } from '../../config/tokens'
+import { notificationService } from '../../core/notification.service'
+import { activationSuccess } from '../../utils/businessActivationHtml'
+import { UserStatus } from '../userBusiness/interfaces/userBusiness.interface'
 
 export type AuthUserBusinessProps = BusinessProps & { userId: string }
 
@@ -36,7 +39,6 @@ export class BusinessService implements IBusinessService<BusinessProps> {
     async create(
         data: CreateBusinessDTO & {
             userId: string
-            role: string
             email: string
         }
     ): Promise<IBusinessDocument> {
@@ -64,8 +66,8 @@ export class BusinessService implements IBusinessService<BusinessProps> {
                     {
                         userId: data.userId,
                         businessId: createdBusiness.id,
-                        role: data?.role || 'owner',
-                        userStatus: 'pending',
+                        role: 'user',
+                        userStatus: UserStatus.PENDING,
                     },
                     session
                 )
@@ -73,12 +75,11 @@ export class BusinessService implements IBusinessService<BusinessProps> {
                 return createdBusiness
             })
 
-            // Send email after commit
-            await sendEmail(
-                admin.email,
-                'Activate your business',
-                `Activate your account by clicking on this link: http://localhost:3000/api/businessActivation/${data.userId}/${token}`
-            )
+            notificationService.notify({
+                email: admin.email,
+                subject: 'Activate your business',
+                message: `Activate your account by clicking on this link: http://localhost:3000/api/businessActivation/${data.userId}/${token}`,
+            })
 
             // withTransaction guarantees newBusiness exists if no error
             return newBusiness!
@@ -109,7 +110,7 @@ export class BusinessService implements IBusinessService<BusinessProps> {
     async activateUser(
         token: string,
         userId: string,
-        role: string
+        userEmail: string
     ): Promise<boolean> {
         const session = await mongoose.startSession()
 
@@ -133,12 +134,18 @@ export class BusinessService implements IBusinessService<BusinessProps> {
 
                 await this.userBusinessRepo.findAndUpdateByUserIdWithSession(
                     userId,
-                    role,
+                    'owner',
                     activateBusiness.id,
                     session
                 )
 
                 activated = true
+            })
+
+            notificationService.notify({
+                email: userEmail,
+                subject: 'Business Activated',
+                message: 'Your business is successfully activated',
             })
 
             return activated
@@ -147,9 +154,3 @@ export class BusinessService implements IBusinessService<BusinessProps> {
         }
     }
 }
-
-export const businessService = new BusinessService(
-    businessRepository,
-    userRepository,
-    userBusinessRepository
-)

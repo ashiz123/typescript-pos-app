@@ -10,7 +10,10 @@ import type {
 } from '../../../src/features/auth/interfaces/authInterface.js'
 import type { Request, Response, NextFunction } from 'express'
 import { ZodError } from 'zod'
-import { LoginResponseType } from '../../../src/features/auth/types/LoginResponseType.type.js'
+import {
+    LoginResponse,
+    LoginWithSelectBusinessDTO,
+} from '../../../src/features/auth/types/LoginResponse.type.js'
 
 const mockUser: IUserProps = {
     name: 'Ram Doe',
@@ -18,17 +21,29 @@ const mockUser: IUserProps = {
     phone: '1234567890',
     password: 'hashedpassword',
     status: 'pending',
+    role: 'owner',
+    createdBy: 'new-object-id',
 }
 
-const mockLoginResponse: LoginResponseType = {
+const mockLoginResponse: LoginResponse = {
     email: 'test@gmail.com',
     token: 'fake-jwt-token',
+}
+
+const mockLoginResponseWithBusiness: LoginWithSelectBusinessDTO = {
+    email: 'test@gmail.com',
+    userId: 'new-object-id',
+    type: 'owner',
+    businessId: 'new-object-id',
 }
 
 const mockAuthService: IAuthService = {
     register: vi.fn().mockResolvedValue(mockUser),
     login: vi.fn().mockResolvedValue(mockLoginResponse),
     logout: vi.fn().mockResolvedValue(true),
+    loginWithSelectBusiness: vi
+        .fn()
+        .mockResolvedValue(mockLoginResponseWithBusiness),
 }
 
 describe('registerUser controller', () => {

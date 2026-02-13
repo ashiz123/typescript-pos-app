@@ -35,7 +35,7 @@ export type IUserRepository = ICrudRepository<
     createUserWithSession(
         userData: CreateUserDTO,
         session: ClientSession
-    ): Promise<IUserDocument>
+    ): Promise<{ user: IUserDocument; newUser: boolean }>
 }
 
 export type IUserService = {
@@ -44,11 +44,18 @@ export type IUserService = {
         newUser: CreateUserDTO,
         createdBy: string
     ): Promise<IUserDocument>
-    activateUser(
+    activateUserWithPassword(
         businessId: string,
         token: string,
         password: string
     ): Promise<IUserDocument | null>
+    activateUserWithoutPassword(
+        userId: string,
+        businessId: string,
+        role: string
+    ): Promise<boolean>
+
+    getUserById(id: string): Promise<IUserProps | null>
 }
 
 export interface IUserController extends ICrudController {
@@ -60,7 +67,7 @@ export interface IUserController extends ICrudController {
     ) => Promise<void>
 
     // Show the set-password form (activation form)
-    activateForm: (
+    activateFormWithPassword: (
         req: Request,
         res: Response,
         next: NextFunction

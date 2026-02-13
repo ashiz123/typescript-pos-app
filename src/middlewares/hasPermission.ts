@@ -12,6 +12,7 @@ import { Roles, ROLE_PERMISSIONS } from '../utils/userPermission'
  */
 export const hasPermission = (permissionName: string) => {
     return (req: Request, res: Response, next: NextFunction) => {
+        console.log(req.user)
         const userRole = req.user?.role
 
         if (!userRole) {

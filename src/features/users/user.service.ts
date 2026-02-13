@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { IUserDocument } from '../auth/interfaces/authInterface'
+import { IUserDocument, IUserProps } from '../auth/interfaces/authInterface'
 import { CreateUserDTO, IUserRepository, IUserService } from './user.type'
 import { UnauthorizedError } from '../../errors/httpErrors'
 import { sendEmail } from '../../utils/sendEmail'
@@ -10,6 +10,8 @@ import { createToken, hashToken } from '../../utils/token'
 import { IUserBusinessRepository } from '../../unused'
 import { TOKENS } from '../../config/tokens'
 import { injectable, inject } from 'tsyringe'
+import { notificationService } from '../../core/notification.service'
+import { UserStatus } from '../userBusiness/interfaces/userBusiness.interface'
 
 @injectable()
 export class UserService implements IUserService {
@@ -20,16 +22,17 @@ export class UserService implements IUserService {
     ) {}
 
     createUser = async (
-        newUser: CreateUserDTO,
+        userData: CreateUserDTO,
         createdBy: string
     ): Promise<IUserDocument> => {
         const token = createToken()
         const session = await mongoose.startSession()
+        let status: 'active' | 'pending'
 
         const canUserAccess =
             await this.userBusinessRepository.canUserAccessBusiness(
                 createdBy,
-                newUser.businessId
+                userData.businessId
             )
 
         if (!canUserAccess) {
@@ -40,38 +43,57 @@ export class UserService implements IUserService {
 
         try {
             const createEmployee = await session.withTransaction(async () => {
-                const employee = await this.repository.createUserWithSession(
-                    { ...newUser, activationToken: hashToken(token) },
-                    session
-                )
+                const { user, newUser } =
+                    await this.repository.createUserWithSession(
+                        { ...userData, activationToken: hashToken(token) },
+                        session
+                    )
+
+                if (newUser) {
+                    status = UserStatus.PENDING
+                } else {
+                    status = UserStatus.ACTIVE
+                }
 
                 await this.userBusinessRepository.assignUserWithSession(
                     {
-                        userId: employee.id,
-                        businessId: newUser.businessId,
-                        role: newUser.role,
+                        userId: user.id,
+                        businessId: userData.businessId,
+                        role: userData.role,
                         createdBy,
-                        userStatus: 'pending',
+                        userStatus: status,
                     },
                     session
                 )
 
-                return employee
+                return { user, newUser }
             })
 
-            await sendEmail(
-                newUser.email,
-                'Activate your account',
-                `Activate your account by clicking on this link: http://localhost:3000/api/userActivation/${newUser.businessId}/${token}`
-            )
+            const { user, newUser } = createEmployee!
 
-            return createEmployee!
+            if (newUser) {
+                //if new user than send the link to change password and activate account
+                notificationService.notify({
+                    email: userData.email,
+                    subject: 'Activate your account',
+                    message: `Activate your account by clicking on this link: http://localhost:3000/api/userActivation/${userData.businessId}/${token}`,
+                })
+            } else {
+                //otherwise dont need to update the password, just user is active with businessId
+                console.log('user activated successfully')
+            }
+
+            return user
         } finally {
             await session.endSession()
         }
     }
 
-    activateUser = async (
+    getUserById = async (id: string): Promise<IUserProps | null> => {
+        return this.repository.findById(id)
+    }
+
+    activateUserWithPassword = async (
         businessId: string,
         token: string,
         password: string
@@ -114,5 +136,25 @@ export class UserService implements IUserService {
         } finally {
             await session.endSession()
         }
+    }
+
+    activateUserWithoutPassword = async (
+        userId: string,
+        businessId: string,
+        role: string
+    ): Promise<boolean> => {
+        const userBusinessUpdate =
+            await this.userBusinessRepository.findAndUpdateByUserIdWithSession(
+                userId,
+                businessId,
+                role
+            )
+
+        if (!userBusinessUpdate) {
+            console.log('Failed to update user business')
+            throw new Error('User not found')
+        }
+
+        return true
     }
 }

@@ -6,7 +6,7 @@ interface ProductBase {
     description?: string
     price: number
     costPrice: number // To calculate profit margins
-    stockQuantity: number
+    stockType: 'stocked' | 'composite'
     isActive: boolean
 }
 

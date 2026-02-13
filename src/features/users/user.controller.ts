@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { ICrudController } from '../../shared/crudControllerInterface'
-import { IUserController, IUserService } from './user.type'
+import { CreateUserDTO, IUserController, IUserService } from './user.type'
 import { injectable, inject } from 'tsyringe'
 import {
     CreateUserValidation,
@@ -16,8 +16,9 @@ import {
     NotFoundError,
     UnauthorizedError,
 } from '../../errors/httpErrors'
-import { setPasswordForm } from '../../utils/setPasswordForm'
+import { formWithPassword } from '../../utils/setPasswordForm'
 import { TOKENS } from '../../config/tokens'
+import { AuthRequestWithBusiness } from '../../shared/requestType'
 
 @injectable()
 export class UserController implements IUserController {
@@ -28,19 +29,39 @@ export class UserController implements IUserController {
     //     this.userService = userService
     // }
 
-    create = async (req: Request, res: Response, next: NextFunction) => {
+    create = async (
+        req: AuthRequestWithBusiness,
+        res: Response,
+        next: NextFunction
+    ) => {
         try {
             // Validation
             const validatedUser: UserRequest = CreateUserValidation.parse(
                 req.body
             )
+
+            if (!req.user) {
+                throw new UnauthorizedError('User not found')
+            }
+
+            if (!req.user.businessId) {
+                throw new UnauthorizedError('Business not found')
+            }
+
+            const { businessId } = req.user
+
+            const requestUserData = {
+                ...validatedUser,
+                businessId,
+            }
+
             if (!req.user) {
                 throw new UnauthorizedError('User not found')
             }
 
             const { userId } = req.user
             const createUser = await this.userService.createUser(
-                validatedUser,
+                requestUserData,
                 userId
             )
             const response: ApiResponse<IUserProps> = {
@@ -54,7 +75,7 @@ export class UserController implements IUserController {
         }
     }
 
-    activateForm = async (
+    activateFormWithPassword = async (
         req: Request,
         res: Response,
         next: NextFunction
@@ -65,7 +86,7 @@ export class UserController implements IUserController {
             if (!token) {
                 throw new BadRequestError('Token is required')
             }
-            res.send(setPasswordForm(token, businessId))
+            res.send(formWithPassword(token, businessId))
         } catch (error) {
             next(error)
         }
@@ -88,7 +109,7 @@ export class UserController implements IUserController {
                 return next(new BadRequestError('Passwords do not match'))
             }
 
-            const user = await this.userService.activateUser(
+            const user = await this.userService.activateUserWithPassword(
                 businessId,
                 token,
                 password
