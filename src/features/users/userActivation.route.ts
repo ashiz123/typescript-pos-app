@@ -1,7 +1,7 @@
+import { createNonCrudRoutes } from '../../shared/nonCrudRouter'
 import { userController } from './user.route'
-import { createCrudRoutes } from '../../shared/nonCrudRouter'
 
-export default createCrudRoutes(userController, {
+export default createNonCrudRoutes(userController, {
     exclude: [],
     middleware: [],
     additionalRoute: [

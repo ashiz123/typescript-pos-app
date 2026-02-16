@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const BusinessSchema = z
+export const BusinessSchemaValidation = z
     .object({
         name: z.string(),
         address: z.string(),
@@ -12,4 +12,4 @@ export const BusinessSchema = z
     })
     .strict()
 
-export type BusinessRequest = z.infer<typeof BusinessSchema>
+export type BusinessRequest = z.infer<typeof BusinessSchemaValidation>

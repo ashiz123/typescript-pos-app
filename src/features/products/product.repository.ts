@@ -1,4 +1,5 @@
-import { CrudRepository, ICrudRepository } from '../../shared/crudRepository'
+import { injectable } from 'tsyringe'
+import { CrudRepository } from '../../shared/crudRepository'
 import {
     CreateProductDTO,
     IProduct,
@@ -6,22 +7,9 @@ import {
     ProductModel,
     UpdateProductDTO,
 } from './product.model'
+import { IProductRepository } from './product.type'
 
-export interface IProductRepository extends ICrudRepository<
-    IProductDocument,
-    CreateProductDTO,
-    UpdateProductDTO
-> {
-    filterProductByCategoryId(categoryId: string): Promise<IProduct[]>
-    filterProductByDateRange(fromDate: Date, toDate: Date): Promise<IProduct[]>
-    generateSKU(prefix?: string): string
-    getProductByBusinessId(businessId: string): Promise<IProduct[]>
-    // discountedProduct(): Promise<IProduct[]>
-    // mostLikedProduct(): Promise<IProduct | null>
-    // mostViewedProduct(): Promise<IProduct | null>
-    // mostRatingProduct(): Promise<IProduct | null>
-}
-
+@injectable()
 export class ProductRepository
     extends CrudRepository<IProductDocument, CreateProductDTO, UpdateProductDTO>
     implements IProductRepository

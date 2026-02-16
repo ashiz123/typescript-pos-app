@@ -4,7 +4,7 @@ import { IBusinessService } from './business.type'
 import { IUserService } from '../users/user.type'
 import { ApiResponse } from '../../types/apiResponseType'
 import {
-    BusinessSchema,
+    BusinessSchemaValidation,
     type BusinessRequest,
 } from './validations/BusinessSchemaValidation'
 import {
@@ -38,7 +38,9 @@ export class BusinessController implements IBusinessController {
                 throw new UnauthorizedError('Logged in user not found')
             }
 
-            const data: BusinessRequest = BusinessSchema.parse(req.body) //validation
+            const data: BusinessRequest = BusinessSchemaValidation.parse(
+                req.body
+            ) //validation
             const businessDataWithUser = {
                 ...data,
                 userId: req.user.userId,

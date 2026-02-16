@@ -1,6 +1,5 @@
 import express, { Router } from 'express'
 import { RouteConfig, RouteHandler } from './baseType'
-import { ICrudController } from './crudControllerInterface'
 
 type OptionType = {
     exclude: string[]
@@ -9,7 +8,7 @@ type OptionType = {
     commonPathPrefix?: string
 }
 
-export function createCrudRoutes(controller, options: OptionType): Router {
+export function createNonCrudRoutes(controller, options: OptionType): Router {
     const router = express.Router()
     const {
         middleware,

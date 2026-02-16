@@ -5,8 +5,8 @@ export interface InventoryBatchBase {
     batchNumber: string
     quantity: number
     price: number
-    recievedData: Date
     expiryDate: Date
+    deletedAt?: Date
 }
 
 export interface InventoryBatchDocument extends InventoryBatchBase, Document {
@@ -21,7 +21,7 @@ export interface CreateInventoryBatchDTO extends InventoryBatchBase {
 
 export type UpdateInventoryBatchDTO = Partial<InventoryBatchBase>
 
-export const InventoryBatch = model<InventoryBatchDocument>(
+export const InventoryBatchModel = model<InventoryBatchDocument>(
     'InventoryBatch',
     InventoryBatchSchema
 )

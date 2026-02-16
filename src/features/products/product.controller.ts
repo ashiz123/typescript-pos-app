@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { ICrudController } from '../../shared/crudControllerInterface'
-import { IProductService, productService } from './product.service'
+import { productService } from './product.service'
 
 import {
     CreateProductSchema,
@@ -12,13 +11,16 @@ import { ApiResponse } from '../../types/apiResponseType'
 import { IProduct } from './product.model'
 import { AuthRequestWithBusiness } from '../../shared/requestType'
 import { UnauthorizedError } from '../../errors/httpErrors'
+import { IProductController, IProductService } from './product.type'
+import { inject, injectable } from 'tsyringe'
+import { TOKENS } from '../../config/tokens'
 
-export class ProductController implements ICrudController {
-    private productService: IProductService
-
-    constructor(productService: IProductService) {
-        this.productService = productService
-    }
+@injectable()
+export class ProductController implements IProductController {
+    constructor(
+        @inject(TOKENS.PRODUCT_SERVICE)
+        private productService: IProductService
+    ) {}
 
     list = async (
         req: AuthRequestWithBusiness,

@@ -1,27 +1,20 @@
-import { ICrudService } from '../../shared/crudServiceInterface'
+import { inject, injectable } from 'tsyringe'
+
 import {
     CreateProductDTO,
     IProduct,
     IProductDocument,
     UpdateProductDTO,
 } from './product.model'
-import { IProductRepository, productRepository } from './product.repository'
+import { productRepository } from './product.repository'
+import { IProductRepository, IProductService } from './product.type'
+import { TOKENS } from '../../config/tokens'
 
-export interface IProductService extends ICrudService<IProduct> {
-    getProductsByCategory(categoryId: string): Promise<IProduct[] | null>
-    getProductByDateRange(
-        fromDate: Date,
-        toDate: Date
-    ): Promise<IProduct[] | null>
-    getProductsByBusinessId(businessId: string): Promise<IProduct[]>
-}
-
+@injectable()
 export class ProductService implements IProductService {
-    private repo: IProductRepository
-
-    constructor(repo: IProductRepository) {
-        this.repo = repo
-    }
+    constructor(
+        @inject(TOKENS.PRODUCT_REPOSITORY) private repo: IProductRepository
+    ) {}
 
     getById = async (productId: string): Promise<IProductDocument | null> => {
         return this.repo.findById(productId)

@@ -11,6 +11,8 @@ import userRoute from '../features/users/user.route.js'
 import { errorHandler } from '../middlewares/errorHandler.js'
 import userActivationRoute from '../features/users/userActivation.route.js'
 import businessActivationRoute from '../features/business/businessActivation.route.js'
+import inventoryBatchRoute from '../features/inventory/inventoryBatchWithProduct.route.js'
+import inventoryBatchWithoutProductRoute from '../features/inventory/inventoryBatchWithoutProduct.route.js'
 
 const app = express()
 
@@ -26,9 +28,13 @@ app.use('/api/product', productRoute)
 app.use('/api/user', userRoute)
 app.use('/api/userActivation', userActivationRoute)
 app.use('/api/businessActivation', businessActivationRoute)
+app.use('/api/inventoryBatch', inventoryBatchRoute)
+app.use('/api/inventoryBatch', inventoryBatchWithoutProductRoute)
+
 // app.get('/api/health', (req, res) => {
 //     res.status(200).json({ status: 'ok' })
 // })
+//
 
 // middlewares at last after routes
 app.use(errorHandler)

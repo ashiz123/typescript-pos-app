@@ -42,11 +42,11 @@ export abstract class CrudRepository<
     }
 
     async delete(id: string): Promise<boolean> {
-        const result = this.model.findByIdAndUpdate(
-            { _id: id, deletedAt: null },
+        console.log('delete id', id)
+        const result = await this.model.findByIdAndUpdate(
+            id,
             {
                 deletedAt: new Date(),
-                isActive: false,
             } as UpdateQuery<T>,
             { new: true } //return new doc rather than old one
         )
