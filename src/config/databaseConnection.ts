@@ -31,6 +31,7 @@ class Database {
         const mongo_uri: string = process.env.MONGODB_URL
 
         try {
+            mongoose.set('debug', true) //debugging true
             const conn = await mongoose.connect(mongo_uri)
             console.log(`mongodb connected: ${conn.connection.host}`)
         } catch (error) {

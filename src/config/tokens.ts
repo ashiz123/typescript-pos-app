@@ -18,4 +18,12 @@ export const TOKENS = {
     PRODUCT_SERVICE: Symbol.for('IProductService'),
     PRODUCT_CONTROLLER: Symbol.for('IProductController'),
     PRODUCT_REPOSITORY: Symbol.for('IProductRepository'),
+
+    ORDER_SERVICE: Symbol.for('IOrderService'),
+    ORDER_CONTROLLER: Symbol.for('IOrderController'),
+    ORDER_REPOSITORY: Symbol.for('IOrderRepository'),
+
+    COUNTER_REPOSITORY: Symbol.for('ICounterRepository'),
+
+    ORDER_ITEM_REPOSITORY: Symbol.for('IOrderItemRepository'),
 }

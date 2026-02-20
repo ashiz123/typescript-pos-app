@@ -18,11 +18,11 @@ export class ProductRepository
         super(ProductModel)
     }
 
-    filterProductByCategoryId(categoryId: string): Promise<IProduct[]> {
+    async filterProductByCategoryId(categoryId: string): Promise<IProduct[]> {
         return this.model.find({ categoryId: categoryId })
     }
 
-    filterProductByDateRange(
+    async filterProductByDateRange(
         fromDate: Date,
         toDate: Date
     ): Promise<IProduct[]> {
@@ -38,7 +38,7 @@ export class ProductRepository
             .exec()
     }
 
-    getProductByBusinessId(businessId: string): Promise<IProduct[]> {
+    async getProductByBusinessId(businessId: string): Promise<IProduct[]> {
         return this.model
             .find({ businessId: businessId })
             .lean()

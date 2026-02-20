@@ -13,6 +13,8 @@ import userActivationRoute from '../features/users/userActivation.route.js'
 import businessActivationRoute from '../features/business/businessActivation.route.js'
 import inventoryBatchRoute from '../features/inventory/inventoryBatchWithProduct.route.js'
 import inventoryBatchWithoutProductRoute from '../features/inventory/inventoryBatchWithoutProduct.route.js'
+import stripeTerminalRoute from '../features/stripe/stripeTerminal.routes.js'
+import orderRoute from '../features/order/order.route.js'
 
 const app = express()
 
@@ -30,6 +32,8 @@ app.use('/api/userActivation', userActivationRoute)
 app.use('/api/businessActivation', businessActivationRoute)
 app.use('/api/inventoryBatch', inventoryBatchRoute)
 app.use('/api/inventoryBatch', inventoryBatchWithoutProductRoute)
+app.use('/api/order', orderRoute)
+app.use('/stripe', stripeTerminalRoute)
 
 // app.get('/api/health', (req, res) => {
 //     res.status(200).json({ status: 'ok' })
