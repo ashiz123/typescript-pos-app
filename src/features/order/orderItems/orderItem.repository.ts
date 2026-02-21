@@ -3,6 +3,7 @@ import {
     CreateOrderItemDTO,
     OrderItemDocument,
     OrderItemModel,
+    OrderItemType,
 } from './orderItem.model'
 import { IOrderItemRepository } from './orderItem.type'
 
@@ -14,9 +15,7 @@ export class OrderItemRepository implements IOrderItemRepository {
         this.orderItemModel = OrderItemModel
     }
 
-    async createOrderItem(
-        data: CreateOrderItemDTO
-    ): Promise<OrderItemDocument> {
+    async createOrderItem(data: OrderItemType): Promise<OrderItemDocument> {
         const orderItem = await this.orderItemModel.create(data)
         return orderItem
     }

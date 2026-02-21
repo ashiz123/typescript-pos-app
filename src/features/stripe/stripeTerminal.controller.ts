@@ -6,7 +6,7 @@ import Stripe from 'stripe'
 export const createConnectionToken = async (req: Request, res: Response) => {
     try {
         const token = await stripe.terminal.connectionTokens.create()
-        res.json({ connection_token: token.secret })
+        res.json({ secret: token.secret })
     } catch (err) {
         console.error(err)
         res.status(500).json({

@@ -2,7 +2,7 @@ import { inject, injectable } from 'tsyringe'
 import { IOrderRepository, IOrderService } from './order.type'
 import { OrderType } from './order.model'
 import { TOKENS } from '../../config/tokens'
-import { getTodayDate } from '../../utils/date'
+
 import { ICounterRepository } from '../counter/counter.repository'
 import { CreateOrderItemDTO } from './orderItems/orderItem.model'
 import { IOrderItemRepository } from './orderItems/orderItem.type'
@@ -26,8 +26,7 @@ export class OrderService implements IOrderService {
     ) {}
 
     async createOrder(items: CreateOrderItemDTO[]): Promise<OrderType> {
-        const todayDate = getTodayDate()
-        const orderId = await this.counterRepository.getNextSequence(todayDate)
+        const orderId = await this.counterRepository.getNextSequence('order')
 
         const total = items.reduce(
             (acc, item) => acc + item.price * item.quantity,

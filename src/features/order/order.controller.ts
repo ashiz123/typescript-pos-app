@@ -3,8 +3,7 @@ import { IOrderController, IOrderService } from './order.type'
 import { Request, Response, NextFunction } from 'express'
 import { TOKENS } from '../../config/tokens'
 import { OrderValidation } from './order.validation'
-import { ApiResponse } from '../../types/apiResponseType'
-import { OrderType } from './order.model'
+
 import { createPaymentIntent } from '../stripe/stripeTerminal.controller'
 
 @injectable()

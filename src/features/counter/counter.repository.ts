@@ -1,5 +1,6 @@
 import { injectable } from 'tsyringe'
 import { CounterModel } from './counter.model'
+import { generateTodayDate } from '../../utils/date'
 
 export interface ICounterRepository {
     getNextSequence(date: string, id?: string): Promise<number>
@@ -13,9 +14,12 @@ export class CounterRepository implements ICounterRepository {
         this.counter = CounterModel
     }
     //$setOnInsert only works , if document is being created rather than updating it.
-    async getNextSequence(date: string, id: string = 'order'): Promise<number> {
+    async getNextSequence(type: string): Promise<number> {
+        const todayDate = generateTodayDate()
+        const counterId = type + '-' + todayDate
+
         const counter = await this.counter.findOneAndUpdate(
-            { _id: id, date: date },
+            { _id: counterId },
             {
                 $inc: { seq: 1 },
                 $setOnInsert: { createdAt: new Date() },
