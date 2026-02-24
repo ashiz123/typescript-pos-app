@@ -7,6 +7,7 @@ export interface OrderType {
     status: 'pending' | 'processing' | 'completed' | 'cancelled'
     items: OrderItemType[]
     total: number
+    paidAmount?: number
 }
 
 export interface OrderDocument extends OrderType, Document {

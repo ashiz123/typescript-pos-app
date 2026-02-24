@@ -2,12 +2,12 @@ import { inject, injectable } from 'tsyringe'
 import { IOrderRepository, IOrderService } from './order.type'
 import { OrderType } from './order.model'
 import { TOKENS } from '../../config/tokens'
-
 import { ICounterRepository } from '../counter/counter.repository'
-import { CreateOrderItemDTO } from './orderItems/orderItem.model'
-import { IOrderItemRepository } from './orderItems/orderItem.type'
-import { IProductRepository } from '../products/product.type'
-import { NotFoundError } from '../../errors/httpErrors'
+import { OrderItemType } from './orderItems/orderItem.model'
+import { IInventoryBatchRepository } from '../inventory/inventoryBatch.type'
+import { PaymentInputType } from '../payment/payment.validation'
+import { IPaymentService } from '../payment/payment.types'
+import mongoose from 'mongoose'
 
 @injectable()
 export class OrderService implements IOrderService {
@@ -18,14 +18,14 @@ export class OrderService implements IOrderService {
         @inject(TOKENS.COUNTER_REPOSITORY)
         private counterRepository: ICounterRepository,
 
-        @inject(TOKENS.ORDER_ITEM_REPOSITORY)
-        private orderItemRepository: IOrderItemRepository,
+        @inject(TOKENS.INVENTORY_BATCH_REPOSITORY)
+        private inventoryRepository: IInventoryBatchRepository,
 
-        @inject(TOKENS.PRODUCT_REPOSITORY)
-        private productRepository: IProductRepository
+        @inject(TOKENS.PAYMENT_SERVICE)
+        private paymentService: IPaymentService
     ) {}
 
-    async createOrder(items: CreateOrderItemDTO[]): Promise<OrderType> {
+    async createOrder(items: OrderItemType[]): Promise<OrderType> {
         const orderId = await this.counterRepository.getNextSequence('order')
 
         const total = items.reduce(
@@ -41,6 +41,42 @@ export class OrderService implements IOrderService {
 
         // const order = //await this.repository.createOrder()
         return newOrder
+    }
+
+    async completeOrder(data: PaymentInputType): Promise<OrderType> {
+        const session = await mongoose.startSession()
+        session.startTransaction()
+
+        try {
+            const updateOrder = await this.orderRepository.completeOrder(
+                data.orderId,
+                data.amount,
+                session
+            )
+
+            if (!updateOrder) throw new Error('Order not success')
+            const toUpdateItems = updateOrder.items
+
+            await Promise.all(
+                toUpdateItems.map((item) =>
+                    this.inventoryRepository.decreaseTotalQuantity(
+                        item.productId,
+                        item.batchId,
+                        item.quantity,
+                        session
+                    )
+                )
+            )
+
+            await this.paymentService.createPayment(data, session)
+
+            return updateOrder
+        } catch (error) {
+            await session.abortTransaction()
+            throw error
+        } finally {
+            session.endSession()
+        }
     }
 
     async getOrder(orderId: string): Promise<void> {

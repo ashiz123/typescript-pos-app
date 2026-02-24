@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import { stripe } from './stripeClient'
 import Stripe from 'stripe'
 
@@ -16,17 +16,28 @@ export const createConnectionToken = async (req: Request, res: Response) => {
 }
 
 export const createPaymentIntent = async (
-    amount: number,
-    currency: string = 'gbp'
+    req: Request,
+    res: Response,
+    next: NextFunction
 ) => {
-    const intent = await stripe.paymentIntents.create({
-        amount,
-        currency,
-        payment_method_types: ['card_present'],
-        capture_method: 'automatic',
-    })
+    try {
+        const { amount, currency } = req.body
 
-    return intent
+        const intent = await stripe.paymentIntents.create({
+            amount,
+            currency,
+            payment_method_types: ['card_present'],
+            capture_method: 'automatic',
+        })
+
+        res.status(200).json({
+            intent_id: intent.id,
+            client_secret: intent.client_secret,
+            price: intent.amount,
+        })
+    } catch (err) {
+        next(err)
+    }
 }
 
 export const capturePaymentIntent = async (req: Request, res: Response) => {

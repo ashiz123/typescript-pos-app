@@ -4,18 +4,14 @@ import { OrderItemSchema } from './orderItem.schema'
 export interface OrderItemType {
     quantity: number
     price: number
-    productId: Types.ObjectId
-    batchId: Types.ObjectId
-}
-
-export interface CreateOrderItemDTO {
-    quantity: number
-    price: number
     productId: string
     batchId: string
 }
 
-export interface OrderItemDocument extends OrderItemType, Document {
+export interface OrderItemDocument
+    extends Omit<OrderItemType, 'productId' | 'batchId'>, Document {
+    productId: Types.ObjectId
+    batchId: Types.ObjectId
     createdAt: Date
     updatedAt: Date
 }

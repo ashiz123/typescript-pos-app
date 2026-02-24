@@ -3,6 +3,8 @@ import 'reflect-metadata'
 import './container.js'
 
 import express from 'express'
+import cors from 'cors'
+import { corsOptions } from '../middlewares/corsMiddleware.js'
 import authRoutes from '../features/auth/auth.route.js'
 import categoryRoutes from '../features/category/category.route.js'
 import businessRoutes from '../features/business/business.route.js'
@@ -17,7 +19,7 @@ import stripeTerminalRoute from '../features/stripe/stripeTerminal.routes.js'
 import orderRoute from '../features/order/order.route.js'
 
 const app = express()
-
+app.use(cors(corsOptions))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 // routes

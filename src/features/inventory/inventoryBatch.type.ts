@@ -1,4 +1,4 @@
-import { get } from 'mongoose'
+import { ClientSession } from 'mongoose'
 import { ICrudController } from '../../shared/crudControllerInterface'
 import { ICrudRepository } from '../../shared/crudRepository'
 import { ICrudService } from '../../shared/crudServiceInterface'
@@ -18,6 +18,12 @@ export interface IInventoryBatchRepository extends ICrudRepository<
 > {
     getBatchNumberRepo(productId: string): Promise<string>
     findByProductId(productId: string): Promise<InventoryBatchBase[]>
+    decreaseTotalQuantity(
+        productId: string,
+        batchId: string,
+        quantity: number,
+        session?: ClientSession
+    ): Promise<void>
 }
 
 export interface IInventoryBatchService extends ICrudService<InventoryBatchBase> {

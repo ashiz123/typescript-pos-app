@@ -14,6 +14,4 @@ export const counterSchema = new Schema<ICounter>(
     { timestamps: true }
 )
 
-counterSchema.index({ type: 1, date: 1 }, { unique: true })
-
 export const CounterModel = model<ICounter>('Counter', counterSchema)

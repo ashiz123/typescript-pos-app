@@ -1,8 +1,8 @@
 import { Schema } from 'mongoose'
-import { OrderItemType } from './orderItems/orderItem.model'
+import { OrderItemDocument } from './orderItems/orderItem.model'
 import { OrderDocument } from './order.model'
 
-const OrderItemSubSchema = new Schema<OrderItemType>({
+const OrderItemSubSchema = new Schema<OrderItemDocument>({
     productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
     batchId: {
         type: Schema.Types.ObjectId,
@@ -24,6 +24,11 @@ export const OrderSchema = new Schema<OrderDocument>({
     total: {
         type: Number,
         required: true,
+        min: 0,
+    },
+    paidAmount: {
+        type: Number,
+        required: false,
         min: 0,
     },
     createdAt: {

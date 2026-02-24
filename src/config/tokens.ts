@@ -26,4 +26,7 @@ export const TOKENS = {
     COUNTER_REPOSITORY: Symbol.for('ICounterRepository'),
 
     ORDER_ITEM_REPOSITORY: Symbol.for('IOrderItemRepository'),
+
+    PAYMENT_REPOSITORY: Symbol.for('IPaymentRepository'),
+    PAYMENT_SERVICE: Symbol.for('IPaymentService'),
 }

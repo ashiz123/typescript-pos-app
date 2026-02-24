@@ -14,7 +14,7 @@ export const OrderItemValidation = {
     price: z.number().min(0, 'Price must be greater than or equal to 0'),
 }
 
-export const OrderValidation = z.object({
+export const OrderCreateValidation = z.object({
     items: z
         .array(z.object(OrderItemValidation))
         .min(1, 'At least one item is required'),

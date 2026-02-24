@@ -8,7 +8,7 @@ import {
 } from './inventoryBatch.model'
 import { CrudRepository } from '../../shared/crudRepository'
 import { injectable } from 'tsyringe'
-import { Types } from 'mongoose'
+import { ClientSession, Types } from 'mongoose'
 
 @injectable()
 export class InventoryBatchRepository
@@ -36,5 +36,33 @@ export class InventoryBatchRepository
         return this.model
             .find({ productId: new Types.ObjectId(productId), deletedAt: null })
             .lean()
+    }
+
+    async decreaseTotalQuantity(
+        productId: string,
+        batchId: string,
+        qty: number,
+        session?: ClientSession
+    ): Promise<void> {
+        console.log(productId, batchId)
+        const result = await this.model.updateOne(
+            {
+                productId: new Types.ObjectId(productId),
+                _id: new Types.ObjectId(batchId),
+                deletedAt: { $eq: null },
+                quantity: { $gte: qty },
+            },
+            { $inc: { quantity: -qty } },
+            { session }
+        )
+        console.log(
+            `Matched: ${result.matchedCount}, Modified: ${result.modifiedCount}`
+        )
+
+        if (result.modifiedCount === 0) {
+            throw new Error(
+                `Insufficient stock for product ${productId} and batch ${batchId} `
+            )
+        }
     }
 }

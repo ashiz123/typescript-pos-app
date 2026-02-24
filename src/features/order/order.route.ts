@@ -10,4 +10,12 @@ export const orderController = container.resolve<IOrderController>(
 export default createCrudRoutes(orderController, {
     exclude: [],
     middleware: [],
+    additionalRoute: [
+        {
+            name: 'complete_order',
+            method: 'post',
+            path: '/complete_order',
+            handler: orderController.completeOrder,
+        },
+    ],
 })
