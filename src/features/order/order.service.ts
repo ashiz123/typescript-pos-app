@@ -70,8 +70,11 @@ export class OrderService implements IOrderService {
 
             await this.paymentService.createPayment(data, session)
 
+            await session.commitTransaction()
+
             return updateOrder
         } catch (error) {
+            console.log(error)
             await session.abortTransaction()
             throw error
         } finally {
