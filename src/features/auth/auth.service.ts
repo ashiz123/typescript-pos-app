@@ -19,8 +19,8 @@ import {
     UserBusiness,
     type LoginResponse,
 } from './types/LoginResponse.type.js'
-import { RedisClientType } from 'redis'
 import { IUserBusinessRepository } from '../userBusiness/interfaces/userBusiness.interface.js'
+import Redis from 'ioredis'
 
 export class AuthService implements IAuthService {
     private readonly authRepository: IAuthRepository
@@ -28,18 +28,18 @@ export class AuthService implements IAuthService {
         password: string,
         hashedPassword: string
     ) => Promise<boolean>
-    private redis: RedisClientType
+    private redis: Redis
     private userBusinessRepository: IUserBusinessRepository
 
     constructor(
         authRepository: IAuthRepository,
         comparePassword,
-        redisClient,
+        redisConnect,
         userBusinessRepository: IUserBusinessRepository
     ) {
         this.authRepository = authRepository
         this.comparePassword = comparePassword
-        this.redis = redisClient
+        this.redis = redisConnect
         this.userBusinessRepository = userBusinessRepository
     }
 
@@ -134,9 +134,7 @@ export class AuthService implements IAuthService {
         }
 
         const token = await signIn(payload)
-        await this.redis.set(`session:${token}`, JSON.stringify(payload), {
-            EX: 3600,
-        })
+        await this.createSession(token, payload)
 
         return {
             email: data.email,
@@ -147,5 +145,22 @@ export class AuthService implements IAuthService {
     async logout(token: string): Promise<boolean> {
         await this.redis.del(`session:${token}`)
         return true
+    }
+
+    async createSession(token: string, payload: Payload) {
+        await this.redis.set(
+            `session:${token}`,
+            JSON.stringify(payload),
+            'EX',
+            3600
+        )
+    }
+
+    async getSessionToken(token: string) {
+        const session = await this.redis.get(`session:${token}`)
+        if (!session) {
+            throw new NotFoundError('Session not found')
+        }
+        return JSON.parse(session)
     }
 }

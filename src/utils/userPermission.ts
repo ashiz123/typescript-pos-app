@@ -19,10 +19,12 @@ const OWNER_PERMISSIONS = [
     'create_business',
     'edit_settings',
     'view_reports',
+    'create_terminal',
 ] as const
 
 const ADMIN_PERMISSIONS = [
     ...OWNER_PERMISSIONS,
+    'approve_terminal',
     'update_owner',
     'remove_owner',
     'accept_owner',

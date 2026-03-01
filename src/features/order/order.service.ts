@@ -1,6 +1,6 @@
 import { inject, injectable } from 'tsyringe'
 import { IOrderRepository, IOrderService } from './order.type'
-import { OrderType } from './order.model'
+import { OrderDocument, OrderType } from './order.model'
 import { TOKENS } from '../../config/tokens'
 import { ICounterRepository } from '../counter/counter.repository'
 import { OrderItemType } from './orderItems/orderItem.model'
@@ -8,6 +8,8 @@ import { IInventoryBatchRepository } from '../inventory/inventoryBatch.type'
 import { PaymentInputType } from '../payment/payment.validation'
 import { IPaymentService } from '../payment/payment.types'
 import mongoose from 'mongoose'
+import { NotFoundError } from '../../errors/httpErrors'
+import { orderQueue } from '../../queues/orderQueue'
 
 @injectable()
 export class OrderService implements IOrderService {
@@ -37,6 +39,17 @@ export class OrderService implements IOrderService {
             orderId,
             items,
             total
+        )
+
+        //calling the queue and adding the job
+        await orderQueue.add(
+            'auto-cancel',
+            { orderId: newOrder._id },
+            {
+                delay: 1 * 60 * 1000,
+                attempts: 3,
+                removeOnComplete: true,
+            }
         )
 
         // const order = //await this.repository.createOrder()
@@ -94,7 +107,16 @@ export class OrderService implements IOrderService {
         return
     }
 
-    async cancelOrder(orderId: string): Promise<void> {
-        return
+    async cancelOrder(orderId: string): Promise<boolean> {
+        const order: OrderDocument | null =
+            await this.orderRepository.orderById(orderId)
+
+        if (!order) throw new NotFoundError('Order not found')
+
+        if (order.status !== 'pending') {
+            throw new Error('Order is not pending')
+        }
+
+        return this.orderRepository.deleteOrder(orderId)
     }
 }

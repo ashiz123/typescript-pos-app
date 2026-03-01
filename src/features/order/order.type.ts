@@ -17,7 +17,7 @@ export interface IOrderService {
     getOrder(orderId: string): Promise<void> //need to change return type
     updateOrderStatus(orderId: string, status: string): Promise<void>
     refundOrder(orderId: string): Promise<void>
-    cancelOrder(orderId: string): Promise<void>
+    cancelOrder(orderId: string): Promise<boolean>
 }
 
 export interface IOrderRepository {
@@ -25,16 +25,18 @@ export interface IOrderRepository {
         orderId: number,
         items: OrderItemType[],
         total: number
-    ): Promise<OrderType>
+    ): Promise<OrderDocument>
     orderById(id: string): Promise<OrderDocument | null>
     completeOrder(
         orderId: string,
         paidAmount: number,
         session?: ClientSession
     ): Promise<OrderDocument | null>
+    deleteOrder(orderId: string): Promise<boolean>
+    cancelOrder(orderId: string): Promise<OrderType | null>
+
     // getOrder(orderId: string): Promise<OrderType>
     // updateOrderStatus(orderId: string, status: string): Promise<void>
     // refundOrder(orderId: string): Promise<void>
-    // cancelOrder(orderId: string): Promise<void>
     // generateOrderNumber(): Promise<string>
 }

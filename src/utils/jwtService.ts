@@ -1,5 +1,5 @@
 import { SignJWT, jwtVerify } from 'jose'
-import { getRedisClient } from '../config/redisConnection.js'
+import { redisConnect } from '../config/ioRedisConnection.js'
 import {
     Payload,
     JwtPayload,
@@ -43,8 +43,10 @@ export async function verifyToken(token: string): Promise<JwtPayload> {
     })
 
     if (payload.type !== 'preAuth') {
-        const redisClient = getRedisClient()
-        if ((await redisClient.get(`session:${token}`)) === null) {
+        const session = await redisConnect.get(`session:${token}`)
+        console.log('4. Redis Result:', session)
+
+        if (!session) {
             throw new Error('Token is invalid or has expired')
         }
     }

@@ -1,6 +1,7 @@
 //express app setup
 import 'reflect-metadata'
 import './container.js'
+import './workers.js'
 
 import express from 'express'
 import cors from 'cors'
@@ -17,6 +18,7 @@ import inventoryBatchRoute from '../features/inventory/inventoryBatchWithProduct
 import inventoryBatchWithoutProductRoute from '../features/inventory/inventoryBatchWithoutProduct.route.js'
 import stripeTerminalRoute from '../features/stripe/stripeTerminal.routes.js'
 import orderRoute from '../features/order/order.route.js'
+import terminalRoute from '../features/terminal/terminal.route.js'
 
 const app = express()
 app.use(cors(corsOptions))
@@ -35,6 +37,7 @@ app.use('/api/businessActivation', businessActivationRoute)
 app.use('/api/inventoryBatch', inventoryBatchRoute)
 app.use('/api/inventoryBatch', inventoryBatchWithoutProductRoute)
 app.use('/api/order', orderRoute)
+app.use('/api/terminal', terminalRoute)
 app.use('/stripe', stripeTerminalRoute)
 
 // app.get('/api/health', (req, res) => {

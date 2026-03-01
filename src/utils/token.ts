@@ -9,3 +9,8 @@ export const hashToken = (token: string) => {
     const hashToken = crypto.createHash('sha256').update(token).digest('hex')
     return hashToken
 }
+
+export const generateActivationCode = () => {
+    const code = crypto.randomInt(100000, 1000000)
+    return code.toString()
+}

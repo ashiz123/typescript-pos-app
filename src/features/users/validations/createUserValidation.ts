@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { object } from 'zod/v3'
 
 const USER_ROLES = ['admin', 'manager', 'cashier', 'employee', 'owner'] as const
 const ACCOUNT_STATUS = ['active', 'pending', 'disabled'] as const
@@ -7,9 +6,9 @@ const PHONE_PATTERN = z.string().regex(/^\+?[1-9]\d{1,14}$/, {
     message: 'Invalid phone number format',
 })
 
-const objectIdSchema = z
-    .string()
-    .regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId format')
+// const objectIdSchema = z
+//     .string()
+//     .regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId format')
 
 const userValidation = z
     .object({

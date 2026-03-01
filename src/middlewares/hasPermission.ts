@@ -35,6 +35,6 @@ export const hasPermission = (permissionName: string) => {
             return next()
         }
 
-        next(new ForbiddenError('Unauthorized user'))
+        next(new ForbiddenError('Permission denied'))
     }
 }

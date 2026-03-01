@@ -1,7 +1,6 @@
 import mongoose, { Schema } from 'mongoose'
 import { IPaymentDocument } from './payment.model'
-import { PAYMENT_STATUS } from './payment.types'
-import { PAYMENT_TYPE } from './payment.constants'
+import { PAYMENT_TYPE, PAYMENT_STATUS } from './payment.constants'
 
 export const PaymentSchema = new Schema<IPaymentDocument>(
     {

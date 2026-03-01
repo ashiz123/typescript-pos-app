@@ -29,4 +29,8 @@ export const TOKENS = {
 
     PAYMENT_REPOSITORY: Symbol.for('IPaymentRepository'),
     PAYMENT_SERVICE: Symbol.for('IPaymentService'),
+
+    TERMINAL_REPOSITORY: Symbol.for('ITerminalRepository'),
+    TERMINAL_SERVICE: Symbol.for('ITerminalService'),
+    TERMINAL_CONTROLLER: Symbol.for('ITerminalController'),
 }

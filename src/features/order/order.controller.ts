@@ -4,6 +4,8 @@ import { Request, Response, NextFunction } from 'express'
 import { TOKENS } from '../../config/tokens'
 import { OrderCreateValidation } from './order.validation'
 import { PaymentValidationSchema } from '../payment/payment.validation'
+import { ApiResponse } from '../../types/apiResponseType'
+import { OrderType } from './order.model'
 
 @injectable()
 export class OrderController implements IOrderController {
@@ -22,21 +24,11 @@ export class OrderController implements IOrderController {
                 throw new Error('Order creation failed or total is missing')
             }
 
-            // const stripeAmount = Math.round(orderData.total * 100)
-
-            // const paymentIntent = await createPaymentIntent(stripeAmount, 'gbp')
-
-            // if (!paymentIntent) {
-            //     throw new Error('Stripe Payment Intent creation failed')
-            // }
-
             const response = {
                 success: true,
                 data: {
                     order: orderData,
                     amount: orderData.total,
-                    // clientSecret: paymentIntent.client_secret,
-                    // paymentIntentId: paymentIntent.id,
                 },
                 message: 'Ready to complete the order',
             }
@@ -53,9 +45,17 @@ export class OrderController implements IOrderController {
                 req.body
             )
 
-            const response = this.orderService.completeOrder(
+            const order = await this.orderService.completeOrder(
                 parsedValidatedPayment
             )
+
+            console.log(order)
+
+            const response: ApiResponse<OrderType> = {
+                success: true,
+                data: order,
+                message: 'Order completed successfully',
+            }
 
             res.status(200).json(response)
         } catch (error) {
@@ -108,6 +108,14 @@ export class OrderController implements IOrderController {
         res: Response,
         next: NextFunction
     ): Promise<void> => {
+        const { orderId } = req.body
+        await this.orderService.cancelOrder(orderId)
+        const response: ApiResponse<OrderType> = {
+            success: true,
+            message: 'Order cancelled succesfully',
+        }
+
+        res.status(200).json(response)
         return
     }
 }

@@ -1,5 +1,6 @@
 import { ClientSession } from 'mongodb'
 import { IPaymentDocument, PaymentType } from './payment.model'
+import { PAYMENT_STATUS } from './payment.constants'
 
 export interface IPaymentController {
     createPayment(payment: PaymentType): Promise<PaymentType>
@@ -29,19 +30,5 @@ export interface IPaymentService {
 //     status: PaymentStatus
 // ): Promise<PaymentType>
 // refundPayment(orderId: string, amount?: number): Promise<PaymentType>
-
-export const PAYMENT_STATUS = {
-    PENDING: 'pending',
-    SUCCESS: 'success',
-    FAILED: 'failed',
-    COMPLETED: 'completed',
-    CANCELLED: 'cancelled',
-    REFUNDED: 'refunded',
-    PARTIAL_REFUNDED: 'partial_refunded',
-    EXPIRED: 'expired',
-    REVERSED: 'reversed',
-    REVERSED_FAILED: 'reversed_failed',
-    REVERSED_SUCCESS: 'reversed_success',
-} as const
 
 export type PaymentStatus = (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS]

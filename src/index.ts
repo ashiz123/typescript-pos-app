@@ -1,6 +1,6 @@
 import app from './config/app.js'
 import Database from './config/databaseConnection.js'
-import { connectRedis } from './config/redisConnection.js'
+import { redisConnect } from './config/ioRedisConnection.js'
 import { logger } from './middlewares/logHandler.js'
 import '../src/core/notification.observer.js'
 import { locationService } from './features/stripe/locationService.js'
@@ -11,9 +11,17 @@ async function bootstrap() {
         logger.info(`Starting application in ${process.env.NODE_ENV} mode`)
         console.log('Environment:', process.env.NODE_ENV)
 
-        await connectRedis()
+        redisConnect.on('ready', () => {
+            console.log('✅ Redis is ready to receive commands!')
+        })
+
+        redisConnect.on('error', (err) => {
+            console.log('⚠️ Redis is not ready yet. Retrying...', err)
+        })
+
         const db = Database.getInstance()
         await db.connect()
+
         logger.info('Connected to MongoDB successfully')
 
         const server = app.listen(port, async () => {
