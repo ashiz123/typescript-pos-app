@@ -36,7 +36,6 @@ export interface IAuthService {
     loginWithSelectBusiness(
         data: LoginWithSelectBusinessDTO
     ): Promise<LoginResponse>
-    createSession(token: string, payload: Payload): Promise<void>
 }
 
 export interface IAuthRepository {

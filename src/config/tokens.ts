@@ -33,4 +33,14 @@ export const TOKENS = {
     TERMINAL_REPOSITORY: Symbol.for('ITerminalRepository'),
     TERMINAL_SERVICE: Symbol.for('ITerminalService'),
     TERMINAL_CONTROLLER: Symbol.for('ITerminalController'),
+
+    AUTH_REPOSITORY: Symbol.for('IAuthRepository'),
+    AUTH_SERVICE: Symbol.for('IAuthService'),
+
+    REDIS: Symbol.for('redis'),
+    SESSION_SERVICE: Symbol.for('ISessionService'),
+
+    ADMIN_REQUEST_MODEL: Symbol.for('AdminRequestModel'),
+    ADMIN_REQUEST_REPOSITORY: Symbol.for('IAdminRequestRepository'),
+    ADMIN_REQUEST_SERVICE: Symbol.for('IAdminRequestService'),
 }

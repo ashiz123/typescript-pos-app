@@ -6,22 +6,13 @@ import {
     logoutUser,
     loginUserWithBusinessId,
 } from './auth.controller.js'
-import { AuthService } from './auth.service.js'
-import { AuthRepository } from './auth.repository.js'
-import { getRedisClient } from '../../config/redisConnection.js'
+
 import { authHandler } from '../../middlewares/authHandler.js'
-import { comparePassword } from '../../utils/password.js'
-import { userBusinessRepository } from '../userBusiness/userBusiness.repository.js'
-import { redisConnect } from '../../config/ioRedisConnection.js'
-// const redisClient = getRedisClient()
+import { container } from 'tsyringe'
+import { IAuthService } from './interfaces/authInterface.js'
+import { TOKENS } from '../../config/tokens.js'
 const router = express.Router()
-const authRepository = new AuthRepository()
-export const authService = new AuthService(
-    authRepository,
-    comparePassword,
-    redisConnect,
-    userBusinessRepository
-)
+const authService = container.resolve<IAuthService>(TOKENS.AUTH_SERVICE)
 router.post('/register', registerUser(authService))
 router.post('/login', loginUser(authService))
 router.post(

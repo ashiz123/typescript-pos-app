@@ -5,6 +5,9 @@ import {
     JwtPayload,
 } from '../features/auth/interfaces/authInterface.js'
 import { PreAuthType } from '../features/auth/types/LoginResponse.type.js'
+import { container } from 'tsyringe'
+import { ISessionService } from '../features/session/session.type.js'
+import { TOKENS } from '../config/tokens.js'
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET)
 
@@ -42,8 +45,14 @@ export async function verifyToken(token: string): Promise<JwtPayload> {
         clockTolerance: 5,
     })
 
+    console.log('payload', payload)
+
+    //holding the session in redis
     if (payload.type !== 'preAuth') {
-        const session = await redisConnect.get(`session:${token}`)
+        const sessionService = container.resolve<ISessionService>(
+            TOKENS.SESSION_SERVICE
+        )
+        const session = await sessionService.getSession(token)
         console.log('4. Redis Result:', session)
 
         if (!session) {

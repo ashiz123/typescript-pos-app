@@ -1,4 +1,6 @@
 import IORedis from 'ioredis'
+import { container } from 'tsyringe'
+import { TOKENS } from './tokens'
 
 export const redisConnect = new IORedis({
     host: process.env.REDIS_HOST || 'redis_pos',
@@ -15,3 +17,5 @@ redisConnect.on('ready', () => {
 redisConnect.on('error', (err) => {
     console.log('⚠️ Redis is not ready yet. Retrying...', err)
 })
+
+container.registerInstance(TOKENS.REDIS, redisConnect)

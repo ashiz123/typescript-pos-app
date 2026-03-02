@@ -4,7 +4,6 @@ import { TERMINAL_PAYMENT_STATUS, TERMINAL_STATUS } from './terminal.constant'
 import { TerminalDocument, TerminalType } from './terminal.model'
 import { TerminalRepository } from './terminal.respository'
 import { ITerminalService } from './terminal.type'
-import { CreateTerminalDTO } from './terminal.validation'
 import { injectable, inject } from 'tsyringe'
 
 @injectable()
@@ -22,6 +21,9 @@ export class TerminalService implements ITerminalService {
             paymentStatus: TERMINAL_PAYMENT_STATUS.PENDING,
             activationCode: generateActivationCode(),
         }
+
+        //add request to admin
+        //send email to admin
 
         return await this.terminalRepository.create(terminalData)
     }

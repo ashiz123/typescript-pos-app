@@ -3,7 +3,9 @@ import { IAuthRepository } from './interfaces/authInterface.js'
 import User from './auth.model.js'
 import { isMongoDuplicateKeyError } from '../../errors/guard.js'
 import { DuplicateEntry } from '../../errors/httpErrors.js'
+import { injectable } from 'tsyringe'
 
+@injectable()
 export class AuthRepository implements IAuthRepository {
     async createUser(data: IUserProps): Promise<IUserDocument> {
         try {
