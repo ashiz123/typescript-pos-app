@@ -6,6 +6,7 @@ import {
     CreateAdminRequestType,
 } from './adminRequest.model'
 import { TOKENS } from '../../config/tokens'
+import { ClientSession } from 'mongoose'
 
 @injectable()
 export class AdminRequestRepository implements IAdminRequestRepository {
@@ -14,7 +15,10 @@ export class AdminRequestRepository implements IAdminRequestRepository {
         private readonly model: typeof AdminRequestModel
     ) {}
 
-    async create(data: CreateAdminRequestType): Promise<AdminRequestDocument> {
+    async createWithSession(
+        data: CreateAdminRequestType,
+        client: ClientSession
+    ): Promise<AdminRequestDocument> {
         return this.model.create(data)
     }
 }

@@ -4,6 +4,8 @@ import { TerminalDocument } from './terminal.model'
 
 export const terminalSchema = new Schema<TerminalDocument>(
     {
+        ownerId: { type: Schema.Types.ObjectId, ref: 'User' },
+
         businessId: { type: Schema.Types.ObjectId, ref: 'Business' },
 
         name: { type: String, required: true, unique: true },

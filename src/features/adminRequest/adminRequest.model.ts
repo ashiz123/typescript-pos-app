@@ -1,18 +1,27 @@
 import mongoose, { Document, Types } from 'mongoose'
-import { AdminStatus, AdminPriority, RequestType } from './adminRequest.type'
+import {
+    AdminStatus,
+    AdminPriority,
+    RequestType,
+    TargetModel,
+} from './adminRequest.type'
 import { AdminRequestSchema } from './adminRequest.schema'
 
 export interface AdminRequestType {
     requestedBy: string
     requestType: RequestType
-    targetModel: string
+    targetModel: TargetModel
     targetId: string
     status: AdminStatus
     priority: AdminPriority
     note?: string
 }
 
-export type CreateAdminRequestType = AdminRequestType
+export type CreateAdminRequestType = {
+    requestedBy: string
+    targetId: string
+    note?: string
+}
 
 export interface AdminRequestDocument
     extends Omit<AdminRequestType, 'requestedBy' | 'targetId'>, Document {

@@ -1,19 +1,19 @@
+import { ClientSession } from 'mongoose'
 import { ICrudRepository } from '../../shared/crudRepository'
-import {
-    TerminalDocument,
-    TerminalType,
-    UpdateTerminalDTO,
-} from './terminal.model'
+import { TerminalDocument, UpdateTerminalDTO } from './terminal.model'
 import { CreateTerminalDTO } from './terminal.validation'
-import { ICrudService } from '../../shared/crudServiceInterface'
-import { RouteHandler } from '../../shared/baseType'
 import { Request, Response, NextFunction } from 'express'
 
-export type ITerminalRepository = ICrudRepository<
+export interface ITerminalRepository extends ICrudRepository<
     TerminalDocument,
     CreateTerminalDTO,
     UpdateTerminalDTO
->
+> {
+    createWithSession(
+        data: CreateTerminalDTO,
+        session: ClientSession
+    ): Promise<TerminalDocument>
+}
 
 export interface ITerminalService {
     createTerminal(data: CreateTerminalDTO): Promise<TerminalDocument>

@@ -1,4 +1,6 @@
 export const TOKENS = {
+    DATABASE_CONNECTION: Symbol.for('Database_connection'),
+
     USER_SERVICE: Symbol.for('IUserService'),
     USER_CONTROLLER: Symbol.for('IUserController'),
     USER_REPOSITORY: Symbol.for('IUserRepository'),

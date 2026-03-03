@@ -7,6 +7,7 @@ import {
 } from './terminal.model'
 import { injectable } from 'tsyringe'
 import { ITerminalRepository } from './terminal.type'
+import { ClientSession } from 'mongoose'
 
 @injectable()
 export class TerminalRepository
@@ -19,5 +20,13 @@ export class TerminalRepository
 {
     constructor() {
         super(TerminalModel)
+    }
+
+    async createWithSession(
+        data: CreateTerminalDTO,
+        session: ClientSession
+    ): Promise<TerminalDocument> {
+        const [terminal] = await this.model.create([data], { session })
+        return terminal
     }
 }

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { TOKENS } from '../../config/tokens'
 import { ITerminalController, ITerminalService } from './terminal.type'
 import { injectable, inject } from 'tsyringe'
-import { TerminalValidation } from './terminal.validation'
+import { CreateTerminalDTO, TerminalValidation } from './terminal.validation'
 import { UnauthorizedError } from '../../errors/httpErrors'
 
 @injectable()
@@ -21,9 +21,11 @@ export class TerminalController implements ITerminalController {
             if (!req.user) {
                 throw new UnauthorizedError('Authenticated user not found')
             }
-            const { businessId } = req.user
-            const parsedValidatedData = TerminalValidation.parse(req.body)
-            const data = { ...parsedValidatedData, businessId }
+            const { businessId, userId } = req.user
+            const ownerId = userId
+            const parsedValidatedData: CreateTerminalDTO =
+                TerminalValidation.parse(req.body)
+            const data = { ...parsedValidatedData, businessId, ownerId }
             const result = await this.terminalService.createTerminal(data)
             res.status(201).json(result)
         } catch (error) {

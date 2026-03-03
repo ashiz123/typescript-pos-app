@@ -9,6 +9,7 @@ export type TerminalPaymentStatus =
     (typeof TERMINAL_PAYMENT_STATUS)[keyof typeof TERMINAL_PAYMENT_STATUS]
 
 export interface TerminalType {
+    ownerId: string
     businessId: string
     name: string
     status: TerminalStatus
@@ -17,8 +18,13 @@ export interface TerminalType {
     approvedAt?: Date
 }
 
+export interface CreateTerminal extends TerminalType {
+    note?: string
+}
+
 export interface TerminalDocument
-    extends Omit<TerminalType, 'businessId'>, Document {
+    extends Omit<TerminalType, 'businessId' | 'ownerId'>, Document {
+    ownerId: Types.ObjectId
     businessId: Types.ObjectId
     createdAt: Date
     updatedAt: Date
