@@ -10,15 +10,17 @@ import { createToken, hashToken } from '../../utils/token'
 import { IUserBusinessRepository } from '../../unused'
 import { TOKENS } from '../../config/tokens'
 import { injectable, inject } from 'tsyringe'
-import { notificationService } from '../../core/notification.service'
 import { UserStatus } from '../userBusiness/interfaces/userBusiness.interface'
+import { IInternalNotificationEmitter } from '../../core/notification.emitter'
 
 @injectable()
 export class UserService implements IUserService {
     constructor(
         @inject(TOKENS.USER_REPOSITORY) private repository: IUserRepository,
         @inject(TOKENS.USER_BUSINESS_REPOSITORY)
-        private userBusinessRepository: IUserBusinessRepository
+        private userBusinessRepository: IUserBusinessRepository,
+        @inject(TOKENS.NOTIFICATION_EMITTER)
+        private notificationEmitter: IInternalNotificationEmitter
     ) {}
 
     createUser = async (
@@ -73,7 +75,7 @@ export class UserService implements IUserService {
 
             if (newUser) {
                 //if new user than send the link to change password and activate account
-                notificationService.notify({
+                this.notificationEmitter.notify({
                     email: userData.email,
                     subject: 'Activate your account',
                     message: `Activate your account by clicking on this link: http://localhost:3000/api/userActivation/${userData.businessId}/${token}`,

@@ -45,5 +45,3 @@ export const AdminRequestSchema = new mongoose.Schema<AdminRequestDocument>(
     },
     { timestamps: true }
 )
-
-module.exports = mongoose.model('AdminRequest', AdminRequestSchema)

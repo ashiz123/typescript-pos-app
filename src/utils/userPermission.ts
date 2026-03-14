@@ -24,6 +24,7 @@ const OWNER_PERMISSIONS = [
 
 const ADMIN_PERMISSIONS = [
     ...OWNER_PERMISSIONS,
+    'admin_dashboard',
     'approve_terminal',
     'update_owner',
     'remove_owner',

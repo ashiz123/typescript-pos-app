@@ -60,5 +60,8 @@
         "tsyringe": "^4.10.0",
         "winston": "^3.19.0",
         "zod": "^4.1.13"
+    },
+    "overrides": {
+        "ioredis": "$ioredis"
     }
 }

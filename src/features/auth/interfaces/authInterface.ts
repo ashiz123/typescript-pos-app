@@ -31,11 +31,15 @@ export interface IUserDocument extends Omit<IUserProps, 'createdBy'>, Document {
 
 export interface IAuthService {
     register(data: IUserProps): Promise<IUserDocument>
-    login(email: string, password: string): Promise<LoginFirstResponse>
+    login(
+        email: string,
+        password: string
+    ): Promise<IUserDocument | LoginFirstResponse>
     logout(token: string): Promise<boolean>
     loginWithSelectBusiness(
         data: LoginWithSelectBusinessDTO
     ): Promise<LoginResponse>
+    adminVerifyToken(email: string, OTP: string): Promise<string>
 }
 
 export interface IAuthRepository {

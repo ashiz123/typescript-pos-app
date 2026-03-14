@@ -56,7 +56,7 @@ export class ProductController implements IProductController {
         next: NextFunction
     ): Promise<void> => {
         try {
-            const { id } = req.params
+            const { id } = req.params as { id: string }
             const product = await this.productService.getById(id)
             const response: ApiResponse<IProduct | null> = {
                 success: true,
@@ -101,7 +101,7 @@ export class ProductController implements IProductController {
         next: NextFunction
     ): Promise<void> => {
         try {
-            const { id } = req.params
+            const { id } = req.params as { id: string }
 
             const validatedData: ProductUpdate = UpdateProductSchema.parse(
                 req.body
@@ -129,7 +129,7 @@ export class ProductController implements IProductController {
         next: NextFunction
     ): Promise<void> => {
         try {
-            const id: string = req.params.id
+            const { id } = req.params as { id: string }
             const deletedBusiness = await this.productService.delete(id)
             if (!deletedBusiness) {
                 throw new Error('Product can not deleted')
@@ -151,7 +151,7 @@ export class ProductController implements IProductController {
         next: NextFunction
     ): Promise<void> => {
         try {
-            const { id } = req.params
+            const { id } = req.params as { id: string }
             const productByCategory =
                 await this.productService.getProductsByCategory(id)
             const response: ApiResponse<IProduct[] | null> = {

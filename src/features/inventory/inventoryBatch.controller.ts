@@ -24,7 +24,7 @@ export class InventoryBatchController implements IInventoryBatchController {
 
     create = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { productId } = req.params
+            const { productId } = req.params as { productId: string }
             const batchNumber: string =
                 await this.inventoryBatchService.generateBatchNumber(productId)
 
@@ -52,7 +52,7 @@ export class InventoryBatchController implements IInventoryBatchController {
 
     update = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id } = req.params
+            const { id } = req.params as { id: string }
             const requestData = UpdateInventoryBatchSchema.parse(req.body)
 
             const { quantity, price, expiryDate } = requestData
@@ -75,7 +75,7 @@ export class InventoryBatchController implements IInventoryBatchController {
 
     remove = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id } = req.params
+            const { id } = req.params as { id: string }
             const deleteInventory = await this.inventoryBatchService.delete(id)
 
             const response: ApiResponse<boolean> = {
@@ -93,7 +93,7 @@ export class InventoryBatchController implements IInventoryBatchController {
 
     list = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { productId } = req.params
+            const { productId } = req.params as { productId: string }
             console.log('productId', productId)
             const inventoryBatches =
                 await this.inventoryBatchService.getInventoryByProductId(

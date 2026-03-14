@@ -1,5 +1,10 @@
 export const TOKENS = {
     DATABASE_CONNECTION: Symbol.for('Database_connection'),
+    NOTIFICATION_EMITTER: Symbol.for('Notification emitter'),
+
+    AUTHCODE_MODEL: Symbol.for('AuthCodeModel'),
+    AUTHCODE_REPOSITORY: Symbol.for('IAuthCodeRepository'),
+    AUTHCODE_SERVICE: Symbol.for('IAuthCodeService'),
 
     USER_SERVICE: Symbol.for('IUserService'),
     USER_CONTROLLER: Symbol.for('IUserController'),
@@ -39,10 +44,17 @@ export const TOKENS = {
     AUTH_REPOSITORY: Symbol.for('IAuthRepository'),
     AUTH_SERVICE: Symbol.for('IAuthService'),
 
-    REDIS: Symbol.for('redis'),
+    REDIS_CONNECT: Symbol.for('redis'),
     SESSION_SERVICE: Symbol.for('ISessionService'),
 
     ADMIN_REQUEST_MODEL: Symbol.for('AdminRequestModel'),
     ADMIN_REQUEST_REPOSITORY: Symbol.for('IAdminRequestRepository'),
     ADMIN_REQUEST_SERVICE: Symbol.for('IAdminRequestService'),
+
+    NOTIFICATION_ADMIN_QUEUE: Symbol.for('NotificationAdminQueue'),
+    NOTIFICATION_OWNER_QUEUE: Symbol.for('NotificationOwnerQueue'),
+    NOTIFICATION_MODEL: Symbol.for('NotificationModel'),
+    NOTIFICATION_REPOSITORY: Symbol.for('INotificationRepository'),
+    NOTIFICATION_SERVICE: Symbol.for('INotificationService'),
+    NOTIFICATION_CONTROLLER: Symbol.for('INotificationController'),
 }

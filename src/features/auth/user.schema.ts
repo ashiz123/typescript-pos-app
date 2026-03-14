@@ -1,7 +1,8 @@
 import { Schema } from 'mongoose'
-import { IUserDocument } from '../features/auth/interfaces/authInterface.js'
 import bcrypt from 'bcryptjs'
-import { hashPassword } from '../utils/password.js'
+import { hashPassword } from '../../utils/password.js'
+import { IUserDocument } from './interfaces/authInterface.js'
+import { USER_ROLE } from './user.constant.js'
 
 //UserClass and AuthClass is use same schema
 export const UserSchema: Schema<IUserDocument> = new Schema(
@@ -28,14 +29,7 @@ export const UserSchema: Schema<IUserDocument> = new Schema(
 
         role: {
             type: String,
-            enum: [
-                'admin',
-                'manager',
-                'owner',
-                'cashier',
-                'accountant',
-                'employee',
-            ],
+            enum: Object.values(USER_ROLE),
             required: true,
             trim: true,
         },

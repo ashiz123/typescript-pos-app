@@ -1,8 +1,3 @@
-//express app setup
-import 'reflect-metadata'
-import './container.js'
-import './workers.js'
-
 import express from 'express'
 import cors from 'cors'
 import { corsOptions } from '../middlewares/corsMiddleware.js'
@@ -19,11 +14,16 @@ import inventoryBatchWithoutProductRoute from '../features/inventory/inventoryBa
 import stripeTerminalRoute from '../features/stripe/stripeTerminal.routes.js'
 import orderRoute from '../features/order/order.route.js'
 import terminalRoute from '../features/terminal/terminal.route.js'
+import notificationRoute from '../features/notification/notification.route.js'
+// import { NotificationWorker } from '../workers/sendNotifictionWorker.js'
+// import { container } from 'tsyringe'
 
 const app = express()
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+// container.resolve(NotificationWorker).setup() //worker running here
+
 // routes
 app.use('/api/auth', authRoutes)
 app.use('/api/business', businessRoutes)
@@ -39,6 +39,7 @@ app.use('/api/inventoryBatch', inventoryBatchWithoutProductRoute)
 app.use('/api/order', orderRoute)
 app.use('/api/terminal', terminalRoute)
 app.use('/stripe', stripeTerminalRoute)
+app.use('/api/admin', notificationRoute)
 
 // app.get('/api/health', (req, res) => {
 //     res.status(200).json({ status: 'ok' })

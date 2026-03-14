@@ -1,5 +1,12 @@
+import { container } from 'tsyringe'
+import { TOKENS } from '../config/tokens'
 import { sendEmail } from '../utils/sendEmail'
-import { notificationService } from './notification.service'
+import { IInternalNotificationEmitter } from './notification.emitter'
+// import { notificationService } from './notification.emitter'
+
+const notificationService = container.resolve<IInternalNotificationEmitter>(
+    TOKENS.NOTIFICATION_EMITTER
+)
 
 notificationService.onNotification(async (data) => {
     try {

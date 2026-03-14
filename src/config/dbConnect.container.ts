@@ -1,8 +1,13 @@
 import { container } from 'tsyringe'
+import { TOKENS } from './tokens.js'
 import mongoose from 'mongoose'
 import Database from './databaseConnection.js'
-import { TOKENS } from './tokens.js'
 
-await Database.getInstance().connect()
+container.register(TOKENS.DATABASE_CONNECTION, {
+    useFactory: () => mongoose.connection,
+})
 
-container.registerInstance(TOKENS.DATABASE_CONNECTION, mongoose.connection)
+const db = container.resolve(Database)
+await db.connect()
+
+console.log('db container is connected and ready')

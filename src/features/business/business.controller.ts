@@ -75,8 +75,8 @@ export class BusinessController implements IBusinessController {
 
     getById = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const businessId: string = req.params.id
-            const business = await this.businessService.getById(businessId)
+            const { id } = req.params as { id: string }
+            const business = await this.businessService.getById(id)
             if (!business) {
                 throw new NotFoundError('Business not found')
             }
@@ -93,10 +93,10 @@ export class BusinessController implements IBusinessController {
 
     update = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const businssId: string = req.params.id
+            const { id } = req.params as { id: string }
             const updatedData: Partial<BusinessRequest> = req.body
             const updatedBusiness = await this.businessService.update(
-                businssId,
+                id,
                 updatedData
             )
             if (!updatedBusiness) {
@@ -117,9 +117,8 @@ export class BusinessController implements IBusinessController {
 
     remove = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const businessId: string = req.params.id
-            const deletedBusiness =
-                await this.businessService.delete(businessId)
+            const { id } = req.params as { id: string }
+            const deletedBusiness = await this.businessService.delete(id)
             if (!deletedBusiness) {
                 throw new Error('Business can not deleted')
             }
@@ -136,7 +135,10 @@ export class BusinessController implements IBusinessController {
 
     activateForm = (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { userId, token } = req.params
+            const { userId, token } = req.params as {
+                token: string
+                userId: string
+            }
 
             if (!token) {
                 throw new BadRequestError('Token is required')
@@ -153,7 +155,10 @@ export class BusinessController implements IBusinessController {
         next: NextFunction
     ): Promise<void> => {
         try {
-            const { token, userId } = req.params
+            const { token, userId } = req.params as {
+                userId: string
+                token: string
+            }
 
             const userData = await this.userService.getUserById(userId)
 

@@ -11,7 +11,7 @@ import {
     Payload,
     IUserProps,
 } from './interfaces/authInterface.js'
-import { signIn } from '../../utils/jwtService.js'
+import { generateToken, signIn } from '../../utils/jwtService.js'
 import {
     LoginFirstResponse,
     LoginWithSelectBusinessDTO,
@@ -20,11 +20,13 @@ import {
     type LoginResponse,
 } from './types/LoginResponse.type.js'
 import { IUserBusinessRepository } from '../userBusiness/interfaces/userBusiness.interface.js'
-import Redis from 'ioredis'
 import { inject, injectable } from 'tsyringe'
 import { TOKENS } from '../../config/tokens.js'
 import { ISessionService } from '../session/session.type.js'
 import { comparePassword } from '../../utils/password.js'
+import { IInternalNotificationEmitter } from '../../core/notification.emitter.js'
+import { generateActivationCode, hashToken } from '../../utils/token.js'
+import { IAuthCode, IAuthCodeRepository } from '../authCode/authCode.type.js'
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -32,7 +34,11 @@ export class AuthService implements IAuthService {
         @inject(TOKENS.AUTH_REPOSITORY) private authRepository: IAuthRepository,
         @inject(TOKENS.SESSION_SERVICE) private session: ISessionService,
         @inject(TOKENS.USER_BUSINESS_REPOSITORY)
-        private userBusinessRepository: IUserBusinessRepository
+        private userBusinessRepository: IUserBusinessRepository,
+        @inject(TOKENS.NOTIFICATION_EMITTER)
+        private notificationEmitter: IInternalNotificationEmitter,
+        @inject(TOKENS.AUTHCODE_REPOSITORY)
+        private authCodeRepository: IAuthCodeRepository
     ) {}
 
     async register(data: IUserProps): Promise<IUserDocument> {
@@ -49,10 +55,13 @@ export class AuthService implements IAuthService {
         return await this.authRepository.createUser(data)
     }
 
-    async login(email: string, password: string): Promise<LoginFirstResponse> {
+    async login(
+        email: string,
+        password: string
+    ): Promise<IUserDocument | LoginFirstResponse> {
         const user: IUserDocument | null =
             await this.authRepository.findByEmail(email)
-        console.log(user)
+
         if (!user) {
             throw new NotFoundError(
                 'User not registered',
@@ -67,6 +76,21 @@ export class AuthService implements IAuthService {
         const isValid = await comparePassword(password, user.password)
         if (!isValid) {
             throw new UnauthorizedError('Invalid credentials')
+        }
+
+        // Added this for admin
+        if (user.role === 'admin') {
+            const accessCode = await this.adminLogin(user)
+
+            if (!accessCode) {
+                throw new NotFoundError('Access code not found')
+            }
+
+            return {
+                role: 'admin',
+                email: user.email,
+                otp: accessCode,
+            }
         }
 
         const data = await this.userBusinessRepository.getUserBusinesses(
@@ -89,6 +113,7 @@ export class AuthService implements IAuthService {
         const token = await signIn(preAuthData)
 
         return {
+            email: user.email,
             token: token,
             businesses,
         }
@@ -118,7 +143,7 @@ export class AuthService implements IAuthService {
             type: 'access',
         }
 
-        const token = await signIn(payload)
+        const token = await generateToken(payload)
         await this.session.createSession(token, payload)
 
         return {
@@ -130,6 +155,52 @@ export class AuthService implements IAuthService {
     async logout(token: string): Promise<boolean> {
         await this.session.deleteSession(token)
         return true
+    }
+
+    async adminLogin(user: IUserDocument) {
+        const accessCode = generateActivationCode()
+        const hashedToken = hashToken(accessCode)
+
+        const authCodeData: IAuthCode = {
+            email: user.email,
+            code: hashedToken,
+            expiresAt: new Date(Date.now() + 5 * 60000),
+        }
+
+        await this.authCodeRepository.create(authCodeData)
+
+        const emailData = {
+            email: user.email,
+            subject: 'Access Code',
+            message: `Enter this access${accessCode} code  to authorize fully`,
+        }
+        this.notificationEmitter.notify(emailData)
+        return accessCode
+    }
+
+    async adminVerifyToken(email: string, otp: string): Promise<string> {
+        const authRecord = await this.authCodeRepository.getByEmail(email)
+
+        if (!authRecord) {
+            throw new Error('Invalid access code or it has expired')
+        }
+
+        const isMatch = comparePassword(otp, authRecord.code)
+
+        if (!isMatch) {
+            throw new Error('Invalid access code')
+        }
+
+        await this.authCodeRepository.delete(authRecord.id)
+
+        const adminData = {
+            email: authRecord.email,
+            role: 'admin',
+            type: 'access',
+        }
+
+        const token = await generateToken(adminData)
+        return token
     }
 
     // async createSession(token: string, payload: Payload) {

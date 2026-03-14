@@ -37,6 +37,11 @@ export const signIn: SignInType = async (data, ttl = '10m') => {
         .sign(secret)
 }
 
+export async function generateToken(payload: any) {
+    const token = await signIn(payload)
+    return token
+}
+
 export async function verifyToken(token: string): Promise<JwtPayload> {
     const { payload } = await jwtVerify<JwtPayload>(token, secret, {
         algorithms: ['HS256'],
@@ -48,7 +53,7 @@ export async function verifyToken(token: string): Promise<JwtPayload> {
     console.log('payload', payload)
 
     //holding the session in redis
-    if (payload.type !== 'preAuth') {
+    if (payload.role !== 'admin' && payload.type !== 'preAuth') {
         const sessionService = container.resolve<ISessionService>(
             TOKENS.SESSION_SERVICE
         )

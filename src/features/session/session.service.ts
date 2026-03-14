@@ -7,7 +7,7 @@ import { NotFoundError } from '../../errors/httpErrors'
 
 @injectable()
 export class SessionService implements ISessionService {
-    constructor(@inject(TOKENS.REDIS) private redis: Redis) {}
+    constructor(@inject(TOKENS.REDIS_CONNECT) private redis: Redis) {}
 
     async createSession(token: string, payload: Payload): Promise<void> {
         await this.redis.set(

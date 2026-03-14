@@ -4,7 +4,6 @@ import { injectable } from 'tsyringe'
 import User from '../auth/auth.model'
 import { IUserDocument } from '../auth/interfaces/authInterface'
 import { CreateUserDTO, IUserRepository, UpdateUserDTO } from './user.type'
-import { ConflictError } from '../../errors/httpErrors'
 
 @injectable()
 export class UserRepository
@@ -36,6 +35,10 @@ export class UserRepository
 
     async getAdmin(): Promise<IUserDocument | null> {
         return await this.model.findOne({ role: 'admin' })
+    }
+
+    async getAllAdmin(): Promise<IUserDocument[]> {
+        return await this.model.find({ role: 'admin' })
     }
 
     async createUserWithSession(

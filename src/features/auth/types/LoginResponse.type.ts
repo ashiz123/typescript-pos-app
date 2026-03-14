@@ -1,4 +1,7 @@
-import { IUserBusinessDocument } from '../../userBusiness/interfaces/userBusiness.interface'
+import {
+    IUserBusinessDocument,
+    UserRole,
+} from '../../userBusiness/interfaces/userBusiness.interface'
 export type LoginResponse = {
     // id?: Types.ObjectId
     email: string
@@ -12,8 +15,11 @@ export type UserBusiness = {
 }
 
 export type LoginFirstResponse = {
-    token: string
-    businesses: UserBusiness[]
+    email: string
+    role?: UserRole
+    otp?: string
+    token?: string
+    businesses?: UserBusiness[]
 }
 
 export type PreAuthType = {

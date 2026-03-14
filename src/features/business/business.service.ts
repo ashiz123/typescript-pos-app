@@ -1,18 +1,14 @@
 import mongoose, { UpdateQuery } from 'mongoose'
-import { businessRepository } from './business.repository'
 import { IBusinessRepository, IBusinessService } from './business.type'
 import { BusinessProps, CreateBusinessDTO } from './business.model'
 import { IUserBusinessRepository } from '../userBusiness/interfaces/userBusiness.interface'
-import { userBusinessRepository } from '../userBusiness/userBusiness.repository'
 import { createToken, hashToken } from '../../utils/token'
-
 import { IBusinessDocument } from './database/business_db_model'
 import { IUserRepository } from '../users/user.type'
-import { userRepository } from '../users/user.repository'
 import { inject, injectable } from 'tsyringe'
 import { TOKENS } from '../../config/tokens'
-import { notificationService } from '../../core/notification.service'
-import { activationSuccess } from '../../utils/businessActivationHtml'
+import { IInternalNotificationEmitter } from '../../core/notification.emitter'
+
 import { UserStatus } from '../userBusiness/interfaces/userBusiness.interface'
 
 export type AuthUserBusinessProps = BusinessProps & { userId: string }
@@ -20,6 +16,8 @@ export type AuthUserBusinessProps = BusinessProps & { userId: string }
 @injectable()
 export class BusinessService implements IBusinessService<BusinessProps> {
     constructor(
+        @inject(TOKENS.NOTIFICATION_EMITTER)
+        private notificationEmitter: IInternalNotificationEmitter,
         @inject(TOKENS.BUSINESS_REPOSITORY)
         private readonly businessRepo: IBusinessRepository,
         @inject(TOKENS.USER_REPOSITORY)
@@ -75,7 +73,7 @@ export class BusinessService implements IBusinessService<BusinessProps> {
                 return createdBusiness
             })
 
-            notificationService.notify({
+            this.notificationEmitter.notify({
                 email: admin.email,
                 subject: 'Activate your business',
                 message: `Activate your account by clicking on this link: http://localhost:3000/api/businessActivation/${data.userId}/${token}`,
@@ -142,7 +140,7 @@ export class BusinessService implements IBusinessService<BusinessProps> {
                 activated = true
             })
 
-            notificationService.notify({
+            this.notificationEmitter.notify({
                 email: userEmail,
                 subject: 'Business Activated',
                 message: 'Your business is successfully activated',

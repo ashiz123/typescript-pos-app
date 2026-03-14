@@ -3,6 +3,7 @@ import { IUserProps, type IAuthService } from './interfaces/authInterface.js'
 import { RegisterSchemaValidation } from './validations/RegisterSchemaValidation.js'
 import { LoginSchemaValidation } from './validations/LoginSchemaValidation.js'
 import { logger } from '../../middlewares/logHandler.js'
+import { AuthService } from './auth.service.js'
 
 export const registerUser =
     (authService: IAuthService) =>
@@ -89,4 +90,23 @@ export const logoutUser =
         }
 
         res.status(200).json({ message: 'User logged out successfully' })
+    }
+
+export const loginWithAcessToken =
+    (authService: IAuthService) =>
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { email, otp } = req.body
+            console.log(otp)
+            //do the validations
+            const result = await authService.adminVerifyToken(email, otp)
+            res.status(200).json({
+                success: true,
+                message: 'User logged in successfully with business',
+                data: result,
+            })
+        } catch (error) {
+            console.log(error)
+            next(error)
+        }
     }

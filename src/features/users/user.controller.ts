@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from 'express'
 import { ICrudController } from '../../shared/crudControllerInterface'
-import { CreateUserDTO, IUserController, IUserService } from './user.type'
+import {
+    CreateUserDTO,
+    IUserController,
+    IUserService,
+    UserParams,
+} from './user.type'
 import { injectable, inject } from 'tsyringe'
 import {
     CreateUserValidation,
@@ -25,9 +30,6 @@ export class UserController implements IUserController {
     constructor(
         @inject(TOKENS.USER_SERVICE) private userService: IUserService
     ) {}
-    // constructor(userService: IUserService) {
-    //     this.userService = userService
-    // }
 
     create = async (
         req: AuthRequestWithBusiness,
@@ -75,14 +77,14 @@ export class UserController implements IUserController {
         }
     }
 
+    //if issue comes i have added type to Request for params
     activateFormWithPassword = async (
-        req: Request,
+        req: Request<UserParams>,
         res: Response,
         next: NextFunction
     ): Promise<void> => {
         try {
             const { token, businessId } = req.params
-            console.log(token)
             if (!token) {
                 throw new BadRequestError('Token is required')
             }

@@ -24,6 +24,7 @@ export const authHandler = async (
             userId: payload.sub,
             email: payload.email,
             type: payload.type,
+            role: payload.role,
         }
 
         next()

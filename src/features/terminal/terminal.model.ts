@@ -16,10 +16,19 @@ export interface TerminalType {
     paymentStatus: TerminalPaymentStatus
     activationCode: string
     approvedAt?: Date
+    approvedBy?: string
 }
 
 export interface CreateTerminal extends TerminalType {
     note?: string
+}
+
+export interface ApproveTerminal {
+    terminalId: string
+    businessId: string
+    approvedBy: string
+    status: TerminalStatus
+    approvedAt: Date
 }
 
 export interface TerminalDocument
