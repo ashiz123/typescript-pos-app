@@ -15,11 +15,20 @@ export class OrderRepository implements IOrderRepository {
 
     async createOrder(
         orderId: number,
+        creatorId: string,
+        businessId: string,
+        terminalId: string,
         items: OrderItemType[],
         total: number
     ): Promise<OrderDocument> {
-        console.log('items', items)
-        return this.order.create({ orderId, items, total })
+        return this.order.create({
+            orderId,
+            creatorId,
+            businessId,
+            terminalId,
+            items,
+            total,
+        })
     }
 
     async orderById(id: string): Promise<OrderDocument | null> {

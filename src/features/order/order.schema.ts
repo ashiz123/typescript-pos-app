@@ -31,6 +31,21 @@ export const OrderSchema = new Schema<OrderDocument>({
         required: false,
         min: 0,
     },
+    creatorId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+    terminalId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Terminal',
+        required: true,
+    },
+    businessId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Business',
+        required: true,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

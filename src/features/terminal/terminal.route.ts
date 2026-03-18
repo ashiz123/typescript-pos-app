@@ -33,4 +33,8 @@ router.get(
     terminalController.allActiveTerminals
 )
 
+router.post('/login', terminalController.loginTerminal)
+
+router.post('/logout', authHandler, terminalController.logoutTerminal)
+
 export default router

@@ -1,4 +1,4 @@
-import mongoose, { Document } from 'mongoose'
+import mongoose, { Document, Types } from 'mongoose'
 import { OrderSchema } from './order.schema'
 import { OrderItemType } from './orderItems/orderItem.model'
 
@@ -6,6 +6,9 @@ export interface OrderType {
     orderId: string
     status: 'pending' | 'processing' | 'completed' | 'cancelled'
     items: OrderItemType[]
+    creatorId?: string | Types.ObjectId
+    terminalId?: string | Types.ObjectId
+    businessId?: string | Types.ObjectId
     total: number
     paidAmount?: number
 }

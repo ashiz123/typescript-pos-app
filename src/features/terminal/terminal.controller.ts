@@ -8,15 +8,19 @@ import {
     CreateTerminalDTO,
     CreateTerminalValidation,
 } from './terminal.validation'
-import { UnauthorizedError } from '../../errors/httpErrors'
+import { NotFoundError, UnauthorizedError } from '../../errors/httpErrors'
 import { ApiResponse } from '../../types/apiResponseType'
 import { TerminalDocument } from './terminal.model'
+import { ITerminalSessionService } from './terminalSession/terminalSession.type'
+import { ITerminalSessionDocument } from './terminalSession/terminalSession.model'
 
 @injectable()
 export class TerminalController implements ITerminalController {
     constructor(
         @inject(TOKENS.TERMINAL_SERVICE)
-        private terminalService: ITerminalService
+        private terminalService: ITerminalService,
+        @inject(TOKENS.TERMINAL_SESSION_SERVICE)
+        private terminalSessionService: ITerminalSessionService
     ) {}
 
     createTerminal = async (
@@ -74,6 +78,55 @@ export class TerminalController implements ITerminalController {
             }
             res.status(200).json(response)
             return
+        } catch (error) {
+            console.log(error)
+            next(error)
+        }
+    }
+
+    loginTerminal = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            console.log('login here')
+            const { terminalId, email, pin } = req.body
+            const response = await this.terminalSessionService.terminalLogin(
+                terminalId,
+                email,
+                pin
+            )
+
+            res.status(200).json(response)
+
+            return
+        } catch (error) {
+            console.log(error)
+            next(error)
+        }
+    }
+
+    logoutTerminal = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            if (!req.user) {
+                throw new NotFoundError('User not found to create the user')
+            }
+            const { terminalSessionId } = req.user
+            console.log('terminal session id', terminalSessionId)
+
+            await this.terminalSessionService.terminalLogout(terminalSessionId)
+
+            const response: ApiResponse<boolean> = {
+                success: true,
+                message: 'Terminal logout successfully',
+            }
+
+            res.status(200).json(response)
         } catch (error) {
             console.log(error)
             next(error)

@@ -8,6 +8,8 @@ import { PreAuthType } from '../features/auth/types/LoginResponse.type.js'
 import { container } from 'tsyringe'
 import { ISessionService } from '../features/session/session.type.js'
 import { TOKENS } from '../config/tokens.js'
+import { ConflictError } from '../errors/httpErrors.js'
+import { AUTH_TYPE, USER_ROLE } from '../features/auth/user.constant.js'
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET)
 
@@ -50,10 +52,15 @@ export async function verifyToken(token: string): Promise<JwtPayload> {
         clockTolerance: 5,
     })
 
-    console.log('payload', payload)
+    if (!payload.type) {
+        throw new ConflictError('Payload type not found')
+    }
 
     //holding the session in redis
-    if (payload.role !== 'admin' && payload.type !== 'preAuth') {
+    if (
+        payload.role !== USER_ROLE.ADMIN &&
+        [AUTH_TYPE.APP_ACCESS, AUTH_TYPE.TERMINAL_ACCESS].includes(payload.type)
+    ) {
         const sessionService = container.resolve<ISessionService>(
             TOKENS.SESSION_SERVICE
         )

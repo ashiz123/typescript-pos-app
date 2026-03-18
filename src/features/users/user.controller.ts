@@ -1,17 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
-import { ICrudController } from '../../shared/crudControllerInterface'
-import {
-    CreateUserDTO,
-    IUserController,
-    IUserService,
-    UserParams,
-} from './user.type'
+import { IUserController, IUserService } from './user.type'
 import { injectable, inject } from 'tsyringe'
 import {
     CreateUserValidation,
-    UpdateUserValidation,
     UserRequest,
-    UpdateUserRequest,
 } from './validations/createUserValidation'
 import { ApiResponse } from '../../types/apiResponseType'
 import { IUserProps } from '../auth/interfaces/authInterface'
@@ -77,14 +69,16 @@ export class UserController implements IUserController {
         }
     }
 
-    //if issue comes i have added type to Request for params
     activateFormWithPassword = async (
-        req: Request<UserParams>,
+        req: Request,
         res: Response,
         next: NextFunction
     ): Promise<void> => {
         try {
-            const { token, businessId } = req.params
+            const { token, businessId } = req.params as {
+                token: string
+                businessId: string
+            }
             if (!token) {
                 throw new BadRequestError('Token is required')
             }

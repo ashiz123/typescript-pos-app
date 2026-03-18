@@ -9,6 +9,23 @@ import {
 import { ApproveTerminalDTO, CreateTerminalDTO } from './terminal.validation'
 import { Request, Response, NextFunction } from 'express'
 import { RouteHandler } from '../../shared/baseType'
+import { IBusinessDocument } from '../business/database/business_db_model'
+
+export type PopulatedTerminal = TerminalDocument & {
+    businessId: IBusinessDocument // This replaces the ID with the actual object
+}
+
+export interface ITerminalAuthContext {
+    activationCode: string
+    businessId: string
+    user: {
+        _id: string
+        email: string
+    }
+    membership: {
+        role: string
+    }
+}
 
 export interface ITerminalRepository extends ICrudRepository<
     TerminalDocument,
@@ -27,6 +44,11 @@ export interface ITerminalRepository extends ICrudRepository<
         businessId: string
     ): Promise<TerminalDocument | null>
     getTerminalsByBusinessId(businessId: string): Promise<TerminalDocument[]>
+    getBusiness(terminalId: string): Promise<PopulatedTerminal | null>
+    getAuthorizedContext(
+        terminalId: string,
+        email: string
+    ): Promise<ITerminalAuthContext>
 }
 
 export interface ITerminalService {
@@ -49,6 +71,6 @@ export interface ITerminalController {
         next: NextFunction
     ): Promise<void>
     allActiveTerminals: RouteHandler
-    // stopTerminal: RouteHandler
-    // deleteTerminal: RouteHandler
+    loginTerminal: RouteHandler
+    logoutTerminal: RouteHandler
 }

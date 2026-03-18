@@ -4,6 +4,7 @@ import {
     LoginResponse,
     LoginWithSelectBusinessDTO,
 } from '../types/LoginResponse.type.js'
+import { AuthType, UserRole } from '../auth.type.js'
 
 export interface IUserProps {
     name: string
@@ -52,19 +53,25 @@ export interface IAuthRepository {
 export type Payload = {
     sub: string
     email: string
-    role?: string
+    role?: UserRole
     businessId?: string
+    terminalId?: string
     status?: string
-    type: string
+    type?: AuthType
+    terminalSessionId?: string
+    sessionStatus?: string
 }
 
 export interface JwtPayload {
     sub: string // user id
     email: string
     status?: string
-    type?: string
+    type?: AuthType
     businessId?: string
-    role: 'cashier' | 'admin' | 'manager' | 'employee'
+    terminalId?: string
+    terminalSessionId?: string
+    sessionStatus?: string
+    role: UserRole
     iat: number
     exp: number
     iss: string

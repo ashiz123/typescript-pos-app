@@ -12,7 +12,12 @@ export interface IOrderController extends ICrudController {
 }
 
 export interface IOrderService {
-    createOrder(items: OrderItemType[]): Promise<OrderType>
+    createOrder(
+        creatorId: string, //Order creater
+        businessId: string,
+        terminalId: string,
+        items: OrderItemType[]
+    ): Promise<OrderType>
     completeOrder(items: PaymentInputType): Promise<OrderType>
     getOrder(orderId: string): Promise<void> //need to change return type
     updateOrderStatus(orderId: string, status: string): Promise<void>
@@ -23,6 +28,9 @@ export interface IOrderService {
 export interface IOrderRepository {
     createOrder(
         orderId: number,
+        creatorId: string,
+        businessId: string,
+        terminalId: string,
         items: OrderItemType[],
         total: number
     ): Promise<OrderDocument>

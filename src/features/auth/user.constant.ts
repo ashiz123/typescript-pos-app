@@ -5,3 +5,9 @@ export const USER_ROLE = {
     CASHIER: 'cashier',
     EMPLOYEE: 'employee',
 }
+
+export const AUTH_TYPE = {
+    PREAUTH: 'preAuth',
+    APP_ACCESS: 'access',
+    TERMINAL_ACCESS: 'terminal',
+}

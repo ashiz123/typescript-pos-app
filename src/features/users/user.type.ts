@@ -18,11 +18,6 @@ export interface CreateUserDTO {
     activationToken?: string
 }
 
-export interface UserParams {
-    token: string
-    businessId: string
-}
-
 export type UpdateUserDTO = Partial<Omit<CreateUserDTO, 'activationToken'>>
 
 export type IUserRepository = ICrudRepository<
@@ -74,7 +69,7 @@ export interface IUserController extends ICrudController {
 
     // Show the set-password form (activation form)
     activateFormWithPassword: (
-        req: Request<UserParams>,
+        req: Request,
         res: Response,
         next: NextFunction
     ) => Promise<void>

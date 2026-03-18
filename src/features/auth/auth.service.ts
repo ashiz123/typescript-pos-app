@@ -19,7 +19,11 @@ import {
     UserBusiness,
     type LoginResponse,
 } from './types/LoginResponse.type.js'
-import { IUserBusinessRepository } from '../userBusiness/interfaces/userBusiness.interface.js'
+import {
+    IUserBusinessDocument,
+    IUserBusinessProps,
+    IUserBusinessRepository,
+} from '../userBusiness/interfaces/userBusiness.interface.js'
 import { inject, injectable } from 'tsyringe'
 import { TOKENS } from '../../config/tokens.js'
 import { ISessionService } from '../session/session.type.js'
@@ -122,10 +126,11 @@ export class AuthService implements IAuthService {
     async loginWithSelectBusiness(
         data: LoginWithSelectBusinessDTO
     ): Promise<LoginResponse> {
-        const userBusiness = await this.userBusinessRepository.getUserBusiness(
-            data.userId,
-            data.businessId
-        )
+        const userBusiness: IUserBusinessDocument | null =
+            await this.userBusinessRepository.getUserBusiness(
+                data.userId,
+                data.businessId
+            )
 
         if (!userBusiness) {
             throw new NotFoundError(

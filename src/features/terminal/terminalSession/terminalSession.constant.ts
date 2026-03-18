@@ -1,4 +1,4 @@
-export const TERMINAL_ASSIGN_STATUS = {
+export const TERMINAL_SESSION_STATUS = {
     ACTIVE: 'active',
     INACTIVE: 'INACTIVE',
     DISABLE: 'DISABLE',

@@ -1,14 +1,14 @@
 import { ClientSession, Document, Model, Types } from 'mongoose'
 import { IUserDocument } from '../../auth/interfaces/authInterface'
 
-export type UserRole =
-    | 'owner'
-    | 'admin'
-    | 'manager'
-    | 'cashier'
-    | 'accountant'
-    | 'user'
-    | 'viewer'
+// export type UserRole =
+//     | 'owner'
+//     | 'admin'
+//     | 'manager'
+//     | 'cashier'
+//     | 'accountant'
+//     | 'user'
+//     | 'viewer'
 
 export const UserStatus = {
     PENDING: 'pending',

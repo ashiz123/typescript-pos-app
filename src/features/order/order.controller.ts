@@ -6,6 +6,8 @@ import { OrderCreateValidation } from './order.validation'
 import { PaymentValidationSchema } from '../payment/payment.validation'
 import { ApiResponse } from '../../types/apiResponseType'
 import { OrderType } from './order.model'
+import { NotFoundError, UnauthorizedError } from '../../errors/httpErrors'
+import { AUTH_TYPE } from '../auth/user.constant'
 
 @injectable()
 export class OrderController implements IOrderController {
@@ -15,8 +17,25 @@ export class OrderController implements IOrderController {
 
     create = async (req: Request, res: Response, next: NextFunction) => {
         try {
+            if (!req.user) {
+                throw new NotFoundError('User not found to create the user')
+            }
+
+            const { type, businessId, terminalId, userId } = req.user
+
+            if (
+                type !== AUTH_TYPE.TERMINAL_ACCESS ||
+                !businessId ||
+                !terminalId
+            ) {
+                throw new UnauthorizedError('User UnauthorizedError')
+            }
+
             const parsedValidatedData = OrderCreateValidation.parse(req.body)
             const orderData = await this.orderService.createOrder(
+                userId,
+                businessId,
+                terminalId,
                 parsedValidatedData.items
             )
 

@@ -27,7 +27,12 @@ export class OrderService implements IOrderService {
         private paymentService: IPaymentService
     ) {}
 
-    async createOrder(items: OrderItemType[]): Promise<OrderType> {
+    async createOrder(
+        creatorId: string,
+        businessId: string,
+        terminalId: string,
+        items: OrderItemType[]
+    ): Promise<OrderType> {
         const orderId = await this.counterRepository.getNextSequence('order')
 
         const total = items.reduce(
@@ -37,6 +42,9 @@ export class OrderService implements IOrderService {
 
         const newOrder = await this.orderRepository.createOrder(
             orderId,
+            creatorId,
+            businessId,
+            terminalId,
             items,
             total
         )

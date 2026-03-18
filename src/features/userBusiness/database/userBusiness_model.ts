@@ -4,7 +4,7 @@ import {
     IUserBusinessDocument,
     IUserBusinessModel,
     IUserBusinessProps,
-} from '../interfaces/userBusinessInterface.js'
+} from '../interfaces/userBusiness.interface.js'
 
 // Extend the Model to include static methods
 interface UserBusinessModel extends Model<
