@@ -21,7 +21,7 @@ export class UnauthorizedError extends HttpBaseError {
     }
 }
 
-export class forbiddenError extends HttpBaseError {
+export class ForbiddenError extends HttpBaseError {
     constructor(message = 'Forbidden', location = 'unknown') {
         super(message, location, 403, true)
         this.name = 'ForbiddenError'

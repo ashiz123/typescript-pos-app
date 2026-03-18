@@ -1,55 +1,51 @@
-// load variables from .env
-import mongoose, { mongo } from 'mongoose'
+import mongoose from 'mongoose'
 import { logger } from '../middlewares/logHandler.js'
+import { singleton } from 'tsyringe'
 
-class Database {
-    private static instance: Database
-    private constructor() {} //it block direct instantiaion;
-
-    public static getInstance(): Database {
-        if (!Database.instance) {
-            Database.instance = new Database()
-        }
-        return Database.instance
-    }
+@singleton()
+export class Database {
+    constructor() {}
 
     public async connect(): Promise<void> {
+        // 1. Check if already connected or connecting
         if (
             mongoose.connection.readyState === 1 ||
             mongoose.connection.readyState === 2
         ) {
-            logger.info('Mongodb already connected')
+            logger.info('MongoDB already connected or connecting')
             return
         }
 
-        if (process.env.MONGODB_URL === undefined) {
+        // 2. Validate Env
+        const mongo_uri = process.env.MONGODB_URL
+        if (!mongo_uri) {
             console.error('MONGODB_URL is not defined in environment variables')
             process.exit(1)
         }
 
-        console.log('Attempting connecting mongo db')
-        const mongo_uri: string = process.env.MONGODB_URL
+        console.log('Attempting to connect to MongoDB...')
 
         try {
+            mongoose.set('debug', true)
             const conn = await mongoose.connect(mongo_uri)
-            console.log(`mongodb connected: ${conn.connection.host}`)
+            console.log(`MongoDB Connected: ${conn.connection.host}`)
         } catch (error) {
             console.error('Connection failed with error:', error)
             process.exit(1)
         }
     }
 
-    public async disconnect() {
+    public async disconnect(): Promise<void> {
         try {
             await mongoose.connection.close()
             console.log('MongoDB Disconnected Successfully')
         } catch (error) {
-            console.error('Error connecting db', error)
+            console.error('Error disconnecting from DB:', error)
             process.exit(1)
         }
     }
 
-    public async dropAllDatabase() {
+    public async dropAllDatabase(): Promise<void> {
         try {
             if (mongoose.connection.db) {
                 await mongoose.connection.db.dropDatabase()
@@ -58,7 +54,7 @@ class Database {
                 console.error('No active database connection to drop')
             }
         } catch (error) {
-            console.error('Error dropping dbs', error)
+            console.error('Error dropping databases:', error)
             process.exit(1)
         }
     }

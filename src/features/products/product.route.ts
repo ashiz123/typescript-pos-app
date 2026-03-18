@@ -1,10 +1,11 @@
-// import { authHandler } from '../../middlewares/authHandler'
 import { createCrudRoutes } from '../../shared/baseRouter'
 import { productController } from './product.controller'
+import { authWithBusinessHandler } from '../../middlewares/authWithBusinessHandler'
+import { hasPermission } from '../../middlewares/hasPermission'
 
 export default createCrudRoutes(productController, {
     exclude: [],
-    middleware: [],
+    middleware: [authWithBusinessHandler, hasPermission('handle_product')],
     additionalRoute: [
         {
             name: 'getByCategoryId',

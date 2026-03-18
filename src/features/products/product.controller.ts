@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
-import { ICrudController } from '../../shared/crudControllerInterface'
-import { IProductService, productService } from './product.service'
+import { productService } from './product.service'
+
 import {
     CreateProductSchema,
     ProductRequest,
@@ -9,21 +9,36 @@ import {
 } from './validations/createProduct.validation'
 import { ApiResponse } from '../../types/apiResponseType'
 import { IProduct } from './product.model'
+import { AuthRequestWithBusiness } from '../../shared/requestType'
+import { UnauthorizedError } from '../../errors/httpErrors'
+import { IProductController, IProductService } from './product.type'
+import { inject, injectable } from 'tsyringe'
+import { TOKENS } from '../../config/tokens'
 
-export class ProductController implements ICrudController {
-    private productService: IProductService
-
-    constructor(productService: IProductService) {
-        this.productService = productService
-    }
+@injectable()
+export class ProductController implements IProductController {
+    constructor(
+        @inject(TOKENS.PRODUCT_SERVICE)
+        private productService: IProductService
+    ) {}
 
     list = async (
-        req: Request,
+        req: AuthRequestWithBusiness,
         res: Response,
         next: NextFunction
     ): Promise<void> => {
         try {
-            const productsData = await this.productService.getAll()
+            if (!req.user) {
+                throw new UnauthorizedError('Authorised user not found')
+            }
+
+            const { businessId } = req.user
+            if (!businessId) {
+                throw new UnauthorizedError('Unauthorized business')
+            }
+            const productsData =
+                await this.productService.getProductsByBusinessId(businessId)
+
             const response: ApiResponse<IProduct[]> = {
                 success: true,
                 data: productsData,
@@ -41,7 +56,7 @@ export class ProductController implements ICrudController {
         next: NextFunction
     ): Promise<void> => {
         try {
-            const { id } = req.params
+            const { id } = req.params as { id: string }
             const product = await this.productService.getById(id)
             const response: ApiResponse<IProduct | null> = {
                 success: true,
@@ -55,13 +70,18 @@ export class ProductController implements ICrudController {
     }
 
     create = async (
-        req: Request,
+        req: AuthRequestWithBusiness,
         res: Response,
         next: NextFunction
     ): Promise<void> => {
         try {
+            if (!req.user) {
+                throw new UnauthorizedError('Logged in user not found')
+            }
             const data: ProductRequest = CreateProductSchema.parse(req.body)
-            const newProduct = await this.productService.create(data)
+            const { businessId } = req.user
+            const newProductData = { ...data, businessId }
+            const newProduct = await this.productService.create(newProductData)
             const response: ApiResponse<IProduct> = {
                 success: true,
                 data: newProduct,
@@ -81,7 +101,7 @@ export class ProductController implements ICrudController {
         next: NextFunction
     ): Promise<void> => {
         try {
-            const { id } = req.params
+            const { id } = req.params as { id: string }
 
             const validatedData: ProductUpdate = UpdateProductSchema.parse(
                 req.body
@@ -109,7 +129,7 @@ export class ProductController implements ICrudController {
         next: NextFunction
     ): Promise<void> => {
         try {
-            const id: string = req.params.id
+            const { id } = req.params as { id: string }
             const deletedBusiness = await this.productService.delete(id)
             if (!deletedBusiness) {
                 throw new Error('Product can not deleted')
@@ -131,7 +151,7 @@ export class ProductController implements ICrudController {
         next: NextFunction
     ): Promise<void> => {
         try {
-            const { id } = req.params
+            const { id } = req.params as { id: string }
             const productByCategory =
                 await this.productService.getProductsByCategory(id)
             const response: ApiResponse<IProduct[] | null> = {

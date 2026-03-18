@@ -5,37 +5,49 @@ import {
 } from '../../errors/httpErrors.js'
 
 import {
-    IUser,
+    IUserDocument,
     IAuthRepository,
     IAuthService,
     Payload,
+    IUserProps,
 } from './interfaces/authInterface.js'
-import { signIn } from '../../utils/jwtService.js'
-import { type LoginResponseType } from './types/LoginResponseType.type.js'
-import { logger } from '../../middlewares/logHandler.js'
-import { RedisClientType } from 'redis'
+import { generateToken, signIn } from '../../utils/jwtService.js'
+import {
+    LoginFirstResponse,
+    LoginWithSelectBusinessDTO,
+    PreAuthType,
+    UserBusiness,
+    type LoginResponse,
+} from './types/LoginResponse.type.js'
+import {
+    IUserBusinessDocument,
+    IUserBusinessProps,
+    IUserBusinessRepository,
+} from '../userBusiness/interfaces/userBusiness.interface.js'
+import { inject, injectable } from 'tsyringe'
+import { TOKENS } from '../../config/tokens.js'
+import { ISessionService } from '../session/session.type.js'
+import { comparePassword } from '../../utils/password.js'
+import { IInternalNotificationEmitter } from '../../core/notification.emitter.js'
+import { generateActivationCode, hashToken } from '../../utils/token.js'
+import { IAuthCode, IAuthCodeRepository } from '../authCode/authCode.type.js'
 
+@injectable()
 export class AuthService implements IAuthService {
-    private readonly authRepository: IAuthRepository
-    private readonly comparePassword: (
-        password: string,
-        hashedPassword: string
-    ) => Promise<boolean>
-    private redis: RedisClientType
+    constructor(
+        @inject(TOKENS.AUTH_REPOSITORY) private authRepository: IAuthRepository,
+        @inject(TOKENS.SESSION_SERVICE) private session: ISessionService,
+        @inject(TOKENS.USER_BUSINESS_REPOSITORY)
+        private userBusinessRepository: IUserBusinessRepository,
+        @inject(TOKENS.NOTIFICATION_EMITTER)
+        private notificationEmitter: IInternalNotificationEmitter,
+        @inject(TOKENS.AUTHCODE_REPOSITORY)
+        private authCodeRepository: IAuthCodeRepository
+    ) {}
 
-    constructor(authRepository: IAuthRepository, comparePassword, redisClient) {
-        this.authRepository = authRepository
-        this.comparePassword = comparePassword
-        this.redis = redisClient
-    }
-
-    async register(
-        name: string,
-        email: string,
-        phone: string,
-        password: string
-    ): Promise<IUser> {
-        const user: IUser | null = await this.authRepository.findByEmail(email)
+    async register(data: IUserProps): Promise<IUserDocument> {
+        const user: IUserDocument | null =
+            await this.authRepository.findByEmail(data.email)
 
         if (user) {
             throw new ConflictError(
@@ -44,16 +56,16 @@ export class AuthService implements IAuthService {
             )
         }
 
-        return await this.authRepository.createUser(
-            name,
-            email,
-            phone,
-            password
-        )
+        return await this.authRepository.createUser(data)
     }
 
-    async login(email: string, password: string): Promise<LoginResponseType> {
-        const user: IUser | null = await this.authRepository.findByEmail(email)
+    async login(
+        email: string,
+        password: string
+    ): Promise<IUserDocument | LoginFirstResponse> {
+        const user: IUserDocument | null =
+            await this.authRepository.findByEmail(email)
+
         if (!user) {
             throw new NotFoundError(
                 'User not registered',
@@ -61,29 +73,156 @@ export class AuthService implements IAuthService {
             )
         }
 
-        const isValid = await this.comparePassword(password, user.password)
+        if (!user.password) {
+            throw new UnauthorizedError('User is not activated yet')
+        }
+
+        const isValid = await comparePassword(password, user.password)
         if (!isValid) {
             throw new UnauthorizedError('Invalid credentials')
         }
-        const payload: Payload = {
-            sub: String(user._id),
-            email: user.email,
+
+        // Added this for admin
+        if (user.role === 'admin') {
+            const accessCode = await this.adminLogin(user)
+
+            if (!accessCode) {
+                throw new NotFoundError('Access code not found')
+            }
+
+            return {
+                role: 'admin',
+                email: user.email,
+                otp: accessCode,
+            }
         }
 
-        const token = await signIn(payload)
-        await this.redis.set(`session:${token}`, JSON.stringify(payload), {
-            EX: 3600,
-        })
-        logger.info(await this.redis.get(`session:${token}`))
-        return {
-            id: user._id,
+        const data = await this.userBusinessRepository.getUserBusinesses(
+            user.id
+        )
+
+        //MAPPING FROM DOCUMENT TYPE TO USERBUSINESS TYPE
+        const businesses: UserBusiness[] = data.map((b) => ({
+            businessId: b.businessId.toString(),
+            role: b.role,
+            userStatus: b.userStatus,
+        }))
+
+        const preAuthData: PreAuthType = {
+            sub: user.id,
             email: user.email,
+            type: 'preAuth',
+        }
+
+        const token = await signIn(preAuthData)
+
+        return {
+            email: user.email,
+            token: token,
+            businesses,
+        }
+    }
+
+    async loginWithSelectBusiness(
+        data: LoginWithSelectBusinessDTO
+    ): Promise<LoginResponse> {
+        const userBusiness: IUserBusinessDocument | null =
+            await this.userBusinessRepository.getUserBusiness(
+                data.userId,
+                data.businessId
+            )
+
+        if (!userBusiness) {
+            throw new NotFoundError(
+                'User has no businesses, You are not authorized to login',
+                'authService.loginUser'
+            )
+        }
+
+        const payload: Payload = {
+            sub: data.userId,
+            email: data.email,
+            role: userBusiness.role,
+            status: userBusiness.userStatus,
+            businessId: data.businessId,
+            type: 'access',
+        }
+
+        const token = await generateToken(payload)
+        await this.session.createSession(token, payload)
+
+        return {
+            email: data.email,
             token: token,
         }
     }
 
     async logout(token: string): Promise<boolean> {
-        await this.redis.del(`session:${token}`)
+        await this.session.deleteSession(token)
         return true
     }
+
+    async adminLogin(user: IUserDocument) {
+        const accessCode = generateActivationCode()
+        const hashedToken = hashToken(accessCode)
+
+        const authCodeData: IAuthCode = {
+            email: user.email,
+            code: hashedToken,
+            expiresAt: new Date(Date.now() + 5 * 60000),
+        }
+
+        await this.authCodeRepository.create(authCodeData)
+
+        const emailData = {
+            email: user.email,
+            subject: 'Access Code',
+            message: `Enter this access${accessCode} code  to authorize fully`,
+        }
+        this.notificationEmitter.notify(emailData)
+        return accessCode
+    }
+
+    async adminVerifyToken(email: string, otp: string): Promise<string> {
+        const authRecord = await this.authCodeRepository.getByEmail(email)
+
+        if (!authRecord) {
+            throw new Error('Invalid access code or it has expired')
+        }
+
+        const isMatch = comparePassword(otp, authRecord.code)
+
+        if (!isMatch) {
+            throw new Error('Invalid access code')
+        }
+
+        await this.authCodeRepository.delete(authRecord.id)
+
+        const adminData = {
+            email: authRecord.email,
+            role: 'admin',
+            type: 'access',
+        }
+
+        const token = await generateToken(adminData)
+        return token
+    }
+
+    // async createSession(token: string, payload: Payload) {
+    //     await this.redis.set(
+    //         `session:${token}`,
+    //         JSON.stringify(payload),
+    //         'EX',
+    //         3600
+    //     )
+    //     return
+    // }
+
+    // async getSessionToken(token: string): Promise<Payload> {
+    //     const session = await this.redis.get(`session:${token}`)
+    //     if (!session) {
+    //         throw new NotFoundError('Session not found')
+    //     }
+    //     return JSON.parse(session) as Payload
+    // }
 }

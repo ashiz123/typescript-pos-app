@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { ICrudController } from './crudControllerInterface'
+
 // Factory pattern
 //options is for middleware, validation or some exclude option
 

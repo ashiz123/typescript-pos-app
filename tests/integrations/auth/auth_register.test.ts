@@ -8,6 +8,7 @@ describe.sequential('User registered Integration test', () => {
         name: 'ramesh thapa',
         phone: '23333322222',
         password: 'ramesh123',
+        role: 'admin',
     }
 
     it('should create new user ', async () => {

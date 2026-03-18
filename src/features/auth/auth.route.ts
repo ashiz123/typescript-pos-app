@@ -1,26 +1,28 @@
 import express from 'express'
+const router = express.Router()
+import { authHandler } from '../../middlewares/authHandler.js'
+import { container } from 'tsyringe'
+import { IAuthService } from './interfaces/authInterface.js'
+import { TOKENS } from '../../config/tokens.js'
 import {
     registerUser,
     loginUser,
     getAuthUser,
     logoutUser,
+    loginUserWithBusinessId,
+    loginWithAcessToken,
 } from './auth.controller.js'
-import { AuthService } from './auth.service.js'
-import { AuthRepository } from './auth.repository.js'
-import { getRedisClient } from '../../config/redisConnection.js'
-import { authHandler } from '../../middlewares/authHandler.js'
-import { comparePassword } from '../../utils/password.js'
-const redisClient = getRedisClient()
-const router = express.Router()
-const authRepository = new AuthRepository()
-export const authService = new AuthService(
-    authRepository,
-    comparePassword,
-    redisClient
-)
+
+const authService = container.resolve<IAuthService>(TOKENS.AUTH_SERVICE)
 router.post('/register', registerUser(authService))
 router.post('/login', loginUser(authService))
+router.post(
+    '/loginWithBusiness',
+    authHandler,
+    loginUserWithBusinessId(authService)
+)
 router.get('/auth_user', authHandler, getAuthUser())
 router.post('/logout', authHandler, logoutUser(authService))
+router.post('/verifyOTP', loginWithAcessToken(authService))
 
 export default router

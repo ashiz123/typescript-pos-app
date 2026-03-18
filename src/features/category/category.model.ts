@@ -1,4 +1,5 @@
-import { Types } from 'mongoose'
+import mongoose, { Model, Document, Types } from 'mongoose'
+import { CategorySchema } from './category.schema'
 
 export interface ICategory {
     businessId: string | Types.ObjectId
@@ -13,3 +14,13 @@ export interface ICategory {
 
 export type CreateCategoryDTO = Omit<ICategory, 'createdAt' | 'updatedAt'>
 export type UpdateCategoryDTO = Partial<Omit<CreateCategoryDTO, 'businessId'>>
+
+export interface ICategoryDocument
+    extends Omit<ICategory, 'businessId' | 'parentCategoryId'>, Document {
+    _id: Types.ObjectId
+    businessId: Types.ObjectId
+    parentCategoryId?: Types.ObjectId | null
+}
+
+export const CategoryModel: Model<ICategoryDocument> =
+    mongoose.model<ICategoryDocument>('Category', CategorySchema)

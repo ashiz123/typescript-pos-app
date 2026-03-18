@@ -1,7 +1,10 @@
 import mongoose, { Model } from 'mongoose'
-import { IUser } from './interfaces/authInterface.js'
-import { UserSchema } from '../../database/user_schema.js'
+import { IUserDocument } from './interfaces/authInterface.js'
+import { UserSchema } from './user.schema.js'
 
-const User: Model<IUser> = mongoose.model<IUser>('User', UserSchema)
+const UserModel: Model<IUserDocument> = mongoose.model<IUserDocument>(
+    'User',
+    UserSchema
+)
 
-export default User
+export default UserModel

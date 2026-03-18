@@ -13,8 +13,9 @@ export const productData: CreateProductDTO = {
     description: 'this is shampoo',
     price: 30,
     costPrice: 30, // To calculate profit margins
-    stockQuantity: 12,
     isActive: false,
+    businessId: '696373bcba24fb62c8619667',
+    stockType: 'stocked',
 }
 
 describe('Create the product', () => {

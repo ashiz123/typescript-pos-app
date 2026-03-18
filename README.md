@@ -27,6 +27,14 @@ Centralized Error Handling: Custom httpErrors and guard system to manage applica
 Logging : Winston logger
 
 
+-----Features---------
+Role based authentication system
+Multi-tenant system
+Inventory management
+Onboarding system with invite based user activation
+
+
+
 -----Project Structure------
 
 src
@@ -43,7 +51,7 @@ src
 └── utils/           # Shared utilities (JWT, Password hashing)
 
 ├── docker-compose.yml   # Infrastructure orchestration
-├── Dockerfile           # App containerization             # (As defined before)
+├── Dockerfile           # App containerization            
 └── tests/
 
 ----Project setup-----

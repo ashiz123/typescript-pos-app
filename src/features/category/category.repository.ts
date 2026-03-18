@@ -1,7 +1,10 @@
 import { CrudRepository, ICrudRepository } from '../../shared/crudRepository'
-import { CategoryModel } from '../../database/categories_model'
-import { ICategoryDocument } from '../../database/categories_model'
-import { CreateCategoryDTO, UpdateCategoryDTO } from './category.model'
+import {
+    CategoryModel,
+    CreateCategoryDTO,
+    ICategoryDocument,
+    UpdateCategoryDTO,
+} from './category.model'
 
 export interface ICategoryRepository extends ICrudRepository<
     ICategoryDocument,
