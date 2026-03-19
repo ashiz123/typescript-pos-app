@@ -41,17 +41,22 @@ export class OrderRepository implements IOrderRepository {
         paidAmount: number,
         session?: ClientSession
     ): Promise<OrderDocument | null> {
-        const updateOrder = await this.order.findOneAndUpdate(
-            { _id: orderId, status: 'pending' },
-            {
-                status: 'completed',
-                paidAmount,
-                updatedAt: new Date(),
-            },
-            { new: true, session }
-        )
+        try {
+            const updateOrder = await this.order.findOneAndUpdate(
+                { _id: orderId, status: 'pending' },
+                {
+                    status: 'completed',
+                    paidAmount,
+                    updatedAt: new Date(),
+                },
+                { new: true, session }
+            )
 
-        return updateOrder
+            return updateOrder
+        } catch (error: any) {
+            console.log(error)
+            throw new Error('Database error', error)
+        }
     }
 
     async deleteOrder(orderId: string): Promise<boolean> {

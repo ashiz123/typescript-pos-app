@@ -60,6 +60,8 @@ export class OrderController implements IOrderController {
 
     completeOrder = async (req: Request, res: Response, next: NextFunction) => {
         try {
+            console.log('req.user', req.user)
+
             const parsedValidatedPayment = PaymentValidationSchema.parse(
                 req.body
             )

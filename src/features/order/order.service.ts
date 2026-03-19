@@ -75,6 +75,8 @@ export class OrderService implements IOrderService {
                 session
             )
 
+            console.log('updateOrder', updateOrder)
+
             if (!updateOrder) throw new Error('Order not success')
             const toUpdateItems = updateOrder.items
 
