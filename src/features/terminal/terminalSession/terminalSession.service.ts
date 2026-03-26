@@ -12,7 +12,7 @@ import { AUTH_TYPE } from '../../auth/user.constant'
 import { Payload } from '../../auth/interfaces/authInterface'
 import { TOKENS } from '../../../config/tokens'
 import { UnauthorizedError } from '../../../errors/httpErrors'
-import { generateToken } from '../../../utils/jwtService'
+import { generateTokenForTerminal } from '../../../utils/jwtService'
 import { ISessionService } from '../../session/session.type'
 import { ITerminalRepository } from '../terminal.type'
 
@@ -58,11 +58,14 @@ export class TerminalSessionService implements ITerminalSessionService {
             role: context.membership.role,
             terminalId: terminalId,
             terminalSessionId: terminalSession.id,
-            // sessionStatus: terminalSession.status,   working here
+            // sessionStatus: terminalSession.status,   WORKING HERE
         }
 
-        const token = await generateToken(payload)
+        const token = await generateTokenForTerminal(payload)
         await this.session.createSession(token, payload)
+
+        //set the terminal automatically logout after given time.
+        // owner set the time for automatically logout if terminal is not logged out
 
         return {
             token,

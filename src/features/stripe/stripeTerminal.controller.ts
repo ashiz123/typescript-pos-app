@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from 'express'
 import { stripe } from './stripeClient'
 import Stripe from 'stripe'
+import { container } from 'tsyringe'
+import { IOrderService } from '../order/order.type'
+import { TOKENS } from '../../config/tokens'
+import { OrderService } from '../order/order.service'
+import { ChargePaymentDTO } from './stripePayment.type'
+import { StripeMapper } from './stripe.mapper'
 
 //this connect terminal to stripe account.
 export const createConnectionToken = async (req: Request, res: Response) => {
@@ -48,8 +54,15 @@ export const capturePaymentIntent = async (req: Request, res: Response) => {
 }
 
 export const webhookHandler = async (req: Request, res: Response) => {
+    console.log('auth user', req.user)
     const sig = req.headers['stripe-signature'] as string
+    console.log('sig', sig)
     let event: Stripe.Event
+
+    if (!sig) {
+        console.error('❌ No stripe-signature header found.')
+        return res.status(400).send('Missing stripe-signature header')
+    }
 
     try {
         event = stripe.webhooks.constructEvent(
@@ -57,7 +70,7 @@ export const webhookHandler = async (req: Request, res: Response) => {
             sig,
             process.env.STRIPE_WEBHOOK_SECRET!
         )
-        console.log(event)
+        console.log('stripe webhook event', event)
     } catch (err) {
         console.error(err)
         res.status(400).send('Webhook Error')
@@ -65,13 +78,63 @@ export const webhookHandler = async (req: Request, res: Response) => {
     }
 
     switch (event.type) {
-        case 'payment_intent.succeeded':
-            console.log('Payment succeeded')
-            break
+        case 'charge.succeeded': {
+            try {
+                const orderService = container.resolve<IOrderService>(
+                    TOKENS.ORDER_SERVICE
+                )
 
-        case 'payment_intent.payment_failed':
-            console.log('Payment failed')
+                const charge = event.data.object as Stripe.Charge
+                const dto = StripeMapper.toChargePaymentDTO(charge) //mapping data
+                await orderService.completeOrder(dto)
+
+                console.log(
+                    `✅ Charge Succeeded: ${charge.id} for ${charge.amount / 100} ${charge.currency.toUpperCase()}`
+                )
+            } catch (error) {
+                console.log(error)
+                return res.status(500).json({ error: 'Internal logic failed' })
+            }
+
             break
+        }
+
+        case 'charge.failed': {
+            const charge = event.data.object as Stripe.Charge
+            console.error(`❌ Charge Failed: ${charge.failure_message}`)
+            // यहाँ अर्डरलाई "FAILED" मार्क गर्ने वा लग राख्ने
+            break
+        }
+
+        case 'charge.captured': {
+            const charge = event.data.object as Stripe.Charge
+            console.log(`🎯 Charge Captured: ${charge.id}`)
+            break
+        }
+
+        case 'charge.expired': {
+            const charge = event.data.object as Stripe.Charge
+            console.log(`⚠️ Charge Expired: ${charge.id}`)
+            break
+        }
+
+        case 'charge.pending': {
+            console.log('⏳ Charge is pending...')
+            break
+        }
+
+        case 'charge.refunded': {
+            const charge = event.data.object as Stripe.Charge
+            console.log(`💰 Charge Refunded: ${charge.id}`)
+            // यहाँ Refund सम्बन्धी डेटाबेस अपडेट गर्नुहोस्
+            break
+        }
+
+        case 'charge.updated': {
+            const charge = event.data.object as Stripe.Charge
+            console.log(`📝 Charge Updated: ${charge.id}`)
+            break
+        }
 
         default:
             console.log(`Unhandled event type ${event.type}`)

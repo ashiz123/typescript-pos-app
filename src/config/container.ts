@@ -1,5 +1,6 @@
 import './dbConnect.container'
 import './redis.container'
+import '../features/stripe/stripePayment.container'
 import '../features/authCode/authCode.container'
 import '../core/notificationEmit.container'
 import '../features/users/user.container'

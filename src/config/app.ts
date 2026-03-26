@@ -15,10 +15,19 @@ import stripeTerminalRoute from '../features/stripe/stripeTerminal.routes.js'
 import orderRoute from '../features/order/order.route.js'
 import terminalRoute from '../features/terminal/terminal.route.js'
 import notificationRoute from '../features/notification/notification.route.js'
+import { webhookHandler } from '../features/stripe/stripeTerminal.controller.js'
 // import { NotificationWorker } from '../workers/sendNotifictionWorker.js'
 // import { container } from 'tsyringe'
 
 const app = express()
+
+//webhook route - its always on top
+app.post(
+    '/api/webhook',
+    express.raw({ type: 'application/json' }),
+    webhookHandler
+)
+
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))

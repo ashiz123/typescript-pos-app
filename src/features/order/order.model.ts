@@ -6,6 +6,7 @@ export interface OrderType {
     orderId: string
     status: 'pending' | 'processing' | 'completed' | 'cancelled'
     items: OrderItemType[]
+    terminalSessionId?: string | Types.ObjectId
     creatorId?: string | Types.ObjectId
     terminalId?: string | Types.ObjectId
     businessId?: string | Types.ObjectId

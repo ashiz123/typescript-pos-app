@@ -10,6 +10,14 @@ import { IPaymentService } from '../payment/payment.types'
 import mongoose from 'mongoose'
 import { NotFoundError } from '../../errors/httpErrors'
 import { orderQueue } from '../../queues/orderQueue'
+import {
+    ChargePaymentDTO,
+    IPaymentIntentDTO,
+    IStripePaymentService,
+    StripePaymentData,
+} from '../stripe/stripePayment.type'
+import { PaymentType } from '../payment/payment.model'
+import { PAYMENT_STATUS, PAYMENT_TYPE } from '../payment/payment.constants'
 
 @injectable()
 export class OrderService implements IOrderService {
@@ -24,30 +32,45 @@ export class OrderService implements IOrderService {
         private inventoryRepository: IInventoryBatchRepository,
 
         @inject(TOKENS.PAYMENT_SERVICE)
-        private paymentService: IPaymentService
+        private paymentService: IPaymentService,
+
+        @inject(TOKENS.STRIPE_PAYMENT_SERVICE)
+        private stripeService: IStripePaymentService
     ) {}
 
     async createOrder(
         creatorId: string,
         businessId: string,
         terminalId: string,
+        terminalSessionId: string,
         items: OrderItemType[]
-    ): Promise<OrderType> {
+    ): Promise<IPaymentIntentDTO> {
         const orderId = await this.counterRepository.getNextSequence('order')
 
         const total = items.reduce(
             (acc, item) => acc + item.price * item.quantity,
             0
         )
-
         const newOrder = await this.orderRepository.createOrder(
             orderId,
             creatorId,
             businessId,
             terminalId,
+            terminalSessionId,
             items,
             total
         )
+
+        const totalInPence = Math.round(total * 100)
+
+        const stripeData: StripePaymentData = {
+            amount: totalInPence,
+            currency: 'gbp',
+            orderId: newOrder.id,
+            businessId,
+        }
+        const paymentDetail =
+            await this.stripeService.createPaymentIntent(stripeData)
 
         //calling the queue and adding the job
         await orderQueue.add(
@@ -60,11 +83,10 @@ export class OrderService implements IOrderService {
             }
         )
 
-        // const order = //await this.repository.createOrder()
-        return newOrder
+        return paymentDetail
     }
 
-    async completeOrder(data: PaymentInputType): Promise<OrderType> {
+    async completeOrder(data: ChargePaymentDTO): Promise<OrderType> {
         const session = await mongoose.startSession()
         session.startTransaction()
 
@@ -74,6 +96,8 @@ export class OrderService implements IOrderService {
                 data.amount,
                 session
             )
+
+            console.log('updateOrder', updateOrder)
 
             if (!updateOrder) throw new Error('Order not success')
             const toUpdateItems = updateOrder.items
@@ -89,7 +113,16 @@ export class OrderService implements IOrderService {
                 )
             )
 
-            await this.paymentService.createPayment(data, session)
+            const paymentDataMap: PaymentType = {
+                orderId: data.orderId,
+                stripePaymentId: data.stripePaymentId,
+                type: PAYMENT_TYPE.CARD,
+                status: PAYMENT_STATUS.COMPLETED,
+                amount: data.amount,
+                currency: data.currency,
+            }
+
+            await this.paymentService.createPayment(paymentDataMap, session)
 
             await session.commitTransaction()
 

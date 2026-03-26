@@ -8,6 +8,7 @@ import { ApiResponse } from '../../types/apiResponseType'
 import { OrderType } from './order.model'
 import { NotFoundError, UnauthorizedError } from '../../errors/httpErrors'
 import { AUTH_TYPE } from '../auth/user.constant'
+import { IPaymentIntentDTO } from '../stripe/stripePayment.type'
 
 @injectable()
 export class OrderController implements IOrderController {
@@ -21,7 +22,8 @@ export class OrderController implements IOrderController {
                 throw new NotFoundError('User not found to create the user')
             }
 
-            const { type, businessId, terminalId, userId } = req.user
+            const { type, businessId, terminalId, userId, terminalSessionId } =
+                req.user
 
             if (
                 type !== AUTH_TYPE.TERMINAL_ACCESS ||
@@ -32,24 +34,18 @@ export class OrderController implements IOrderController {
             }
 
             const parsedValidatedData = OrderCreateValidation.parse(req.body)
-            const orderData = await this.orderService.createOrder(
+            const paymentToVerify = await this.orderService.createOrder(
                 userId,
                 businessId,
                 terminalId,
+                terminalSessionId,
                 parsedValidatedData.items
             )
 
-            if (!orderData || !orderData.total) {
-                throw new Error('Order creation failed or total is missing')
-            }
-
-            const response = {
+            const response: ApiResponse<IPaymentIntentDTO> = {
                 success: true,
-                data: {
-                    order: orderData,
-                    amount: orderData.total,
-                },
-                message: 'Ready to complete the order',
+                data: paymentToVerify,
+                message: 'Order processing',
             }
 
             res.status(201).json(response)
@@ -60,23 +56,27 @@ export class OrderController implements IOrderController {
 
     completeOrder = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const parsedValidatedPayment = PaymentValidationSchema.parse(
-                req.body
+            console.log('req.user', req.user)
+
+            // const parsedValidatedPayment = PaymentValidationSchema.parse(
+            //     req.body
+            // )
+
+            // const order = await this.orderService.completeOrder(
+            //     parsedValidatedPayment
+            // )
+
+            // console.log(order)
+
+            // const response: ApiResponse<OrderType> = {
+            //     success: true,
+            //     data: order,
+            //     message: 'Order completed successfully',
+            // }
+
+            res.status(200).json(
+                'Route is not working currently, instead working through stripe webhook'
             )
-
-            const order = await this.orderService.completeOrder(
-                parsedValidatedPayment
-            )
-
-            console.log(order)
-
-            const response: ApiResponse<OrderType> = {
-                success: true,
-                data: order,
-                message: 'Order completed successfully',
-            }
-
-            res.status(200).json(response)
         } catch (error) {
             next(error)
         }

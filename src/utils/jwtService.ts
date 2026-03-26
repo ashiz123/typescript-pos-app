@@ -29,6 +29,7 @@ export type SignInType = (
     data: Payload | PreAuthType,
     ttl?: string
 ) => Promise<string>
+
 export const signIn: SignInType = async (data, ttl = '10m') => {
     return await new SignJWT(data)
         .setProtectedHeader({ alg: 'HS256' })
@@ -37,6 +38,20 @@ export const signIn: SignInType = async (data, ttl = '10m') => {
         .setAudience(AUDIENCE)
         .setExpirationTime(ttl)
         .sign(secret)
+}
+
+export const signInForTerminal: SignInType = async (data) => {
+    return await new SignJWT(data)
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setIssuer(ISSUER)
+        .setAudience(AUDIENCE)
+        .sign(secret)
+}
+
+export async function generateTokenForTerminal(payload: any) {
+    const token = await signInForTerminal(payload)
+    return token
 }
 
 export async function generateToken(payload: any) {

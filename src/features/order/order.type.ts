@@ -4,6 +4,10 @@ import { ICrudController } from '../../shared/crudControllerInterface'
 import { OrderItemType } from './orderItems/orderItem.model'
 import { PaymentInputType } from '../payment/payment.validation'
 import { ClientSession } from 'mongoose'
+import {
+    ChargePaymentDTO,
+    IPaymentIntentDTO,
+} from '../stripe/stripePayment.type'
 
 export interface IOrderController extends ICrudController {
     completeOrder: RouteHandler
@@ -16,9 +20,10 @@ export interface IOrderService {
         creatorId: string, //Order creater
         businessId: string,
         terminalId: string,
+        terminalSessionId: string,
         items: OrderItemType[]
-    ): Promise<OrderType>
-    completeOrder(items: PaymentInputType): Promise<OrderType>
+    ): Promise<IPaymentIntentDTO>
+    completeOrder(items: ChargePaymentDTO): Promise<OrderType>
     getOrder(orderId: string): Promise<void> //need to change return type
     updateOrderStatus(orderId: string, status: string): Promise<void>
     refundOrder(orderId: string): Promise<void>
@@ -31,6 +36,7 @@ export interface IOrderRepository {
         creatorId: string,
         businessId: string,
         terminalId: string,
+        terminalSessionId: string,
         items: OrderItemType[],
         total: number
     ): Promise<OrderDocument>
