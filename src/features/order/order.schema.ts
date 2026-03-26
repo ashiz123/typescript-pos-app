@@ -36,6 +36,11 @@ export const OrderSchema = new Schema<OrderDocument>({
         ref: 'User',
         required: true,
     },
+    terminalSessionId: {
+        type: Schema.Types.ObjectId,
+        ref: 'SessionTerminal',
+        required: true,
+    },
     terminalId: {
         type: Schema.Types.ObjectId,
         ref: 'Terminal',

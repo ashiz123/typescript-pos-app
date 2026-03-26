@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose'
+import { Schema } from 'mongoose'
 import { IPaymentDocument } from './payment.model'
 import { PAYMENT_TYPE, PAYMENT_STATUS } from './payment.constants'
 

@@ -2,6 +2,8 @@ export const TOKENS = {
     DATABASE_CONNECTION: Symbol.for('Database_connection'),
     NOTIFICATION_EMITTER: Symbol.for('Notification emitter'),
 
+    STRIPE_PAYMENT_SERVICE: Symbol.for('IStripePaymentService'),
+
     AUTHCODE_MODEL: Symbol.for('AuthCodeModel'),
     AUTHCODE_REPOSITORY: Symbol.for('IAuthCodeRepository'),
     AUTHCODE_SERVICE: Symbol.for('IAuthCodeService'),

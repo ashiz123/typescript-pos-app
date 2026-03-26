@@ -3,7 +3,11 @@ import { IOrderRepository } from './order.type'
 import { OrderDocument, OrderModel, OrderType } from './order.model'
 import { OrderItemType } from './orderItems/orderItem.model'
 import { ClientSession } from 'mongoose'
-import { ConflictError, NotFoundError } from '../../errors/httpErrors'
+import {
+    BadRequestError,
+    ConflictError,
+    NotFoundError,
+} from '../../errors/httpErrors'
 
 @injectable()
 export class OrderRepository implements IOrderRepository {
@@ -18,17 +22,23 @@ export class OrderRepository implements IOrderRepository {
         creatorId: string,
         businessId: string,
         terminalId: string,
+        terminalSessionId: string,
         items: OrderItemType[],
         total: number
     ): Promise<OrderDocument> {
-        return this.order.create({
-            orderId,
-            creatorId,
-            businessId,
-            terminalId,
-            items,
-            total,
-        })
+        try {
+            return this.order.create({
+                orderId,
+                creatorId,
+                businessId,
+                terminalId,
+                terminalSessionId,
+                items,
+                total,
+            })
+        } catch (err: any) {
+            throw new BadRequestError('Order cannot created', err.message)
+        }
     }
 
     async orderById(id: string): Promise<OrderDocument | null> {
