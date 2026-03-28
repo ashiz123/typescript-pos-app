@@ -1,16 +1,18 @@
-import { beforeAll, afterAll, beforeEach } from 'vitest'
+import { beforeAll, afterAll } from 'vitest'
+import 'reflect-metadata'
 import Database from '../../src/config/databaseConnection.js'
 import {
     getRedisClient,
     connectRedis,
 } from '../../src/config/redisConnection.js'
+import { container } from 'tsyringe'
 
-const db = Database.getInstance()
+const db = container.resolve(Database)
 const redisClient = getRedisClient()
 
 beforeAll(async () => {
-    await db.dropAllDatabase()
     await db.connect()
+    await db.dropAllDatabase()
     await connectRedis()
 })
 
