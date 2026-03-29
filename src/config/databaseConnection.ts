@@ -8,6 +8,7 @@ export class Database {
 
     public async connect(): Promise<void> {
         // 1. Check if already connected or connecting
+        console.log('process.env', process.env.MONGODB_URL)
         if (
             mongoose.connection.readyState === 1 ||
             mongoose.connection.readyState === 2
@@ -27,7 +28,10 @@ export class Database {
 
         try {
             mongoose.set('debug', true)
-            const conn = await mongoose.connect(mongo_uri)
+            const conn = await mongoose.connect(mongo_uri, {
+                serverSelectionTimeoutMS: 5000,
+                directConnection: true,
+            })
             console.log(`MongoDB Connected: ${conn.connection.host}`)
         } catch (error) {
             console.error('Connection failed with error:', error)
