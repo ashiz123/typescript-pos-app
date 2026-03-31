@@ -4,6 +4,8 @@ export const TOKENS = {
 
     STRIPE_PAYMENT_SERVICE: Symbol.for('IStripePaymentService'),
 
+    COMPARE_PASSWORD: Symbol.for('ComparePassword'),
+
     AUTHCODE_MODEL: Symbol.for('AuthCodeModel'),
     AUTHCODE_REPOSITORY: Symbol.for('IAuthCodeRepository'),
     AUTHCODE_SERVICE: Symbol.for('IAuthCodeService'),

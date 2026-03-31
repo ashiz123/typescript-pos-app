@@ -13,16 +13,28 @@ import {
     loginWithAcessToken,
 } from './auth.controller.js'
 
-const authService = container.resolve<IAuthService>(TOKENS.AUTH_SERVICE)
-router.post('/register', registerUser(authService))
-router.post('/login', loginUser(authService))
-router.post(
-    '/loginWithBusiness',
-    authHandler,
-    loginUserWithBusinessId(authService)
-)
+// const authService = container.resolve<IAuthService>(TOKENS.AUTH_SERVICE)
+router.post('/register', (req, res, next) => {
+    const authService = container.resolve<IAuthService>(TOKENS.AUTH_SERVICE)
+    return registerUser(authService)(req, res, next)
+})
+router.post('/login', (req, res, next) => {
+    const authService = container.resolve<IAuthService>(TOKENS.AUTH_SERVICE)
+    return loginUser(authService)(req, res, next)
+})
+router.post('/loginWithBusiness', authHandler, (req, res, next) => {
+    const authService = container.resolve<IAuthService>(TOKENS.AUTH_SERVICE)
+    return loginUserWithBusinessId(authService)
+})
 router.get('/auth_user', authHandler, getAuthUser())
-router.post('/logout', authHandler, logoutUser(authService))
-router.post('/verifyOTP', loginWithAcessToken(authService))
+
+router.post('/logout', authHandler, (req, res, next) => {
+    const authService = container.resolve<IAuthService>(TOKENS.AUTH_SERVICE)
+    return logoutUser(authService)(req, res, next)
+})
+router.post('/verifyOTP', (req, res, next) => {
+    const authService = container.resolve<IAuthService>(TOKENS.AUTH_SERVICE)
+    return loginWithAcessToken(authService)
+})
 
 export default router

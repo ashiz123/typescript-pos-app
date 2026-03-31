@@ -5,6 +5,8 @@
     "main": "index.js",
     "scripts": {
         "test": "vitest --config ./vitest.config.ts",
+        "test:unit": "vitest --project=unit",
+        "test:int": "vitest --project=integration",
         "test:watch": "npx vitest",
         "test:coverage": "npx vitest run --coverage",
         "test:clear": "rm -rf coverage || true",

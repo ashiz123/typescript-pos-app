@@ -13,6 +13,7 @@ CMD ["npm", "run", "dev"]
 
 #stage 3: test
 FROM base AS test
+ENV IS_DOCKER=true
 RUN npm install
 COPY . .
 CMD [ "npm", "test" ]

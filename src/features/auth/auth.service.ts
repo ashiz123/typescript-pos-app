@@ -24,15 +24,15 @@ import {
     IUserBusinessProps,
     IUserBusinessRepository,
 } from '../userBusiness/interfaces/userBusiness.interface.js'
-import { inject, injectable } from 'tsyringe'
+import { inject, singleton } from 'tsyringe'
 import { TOKENS } from '../../config/tokens.js'
 import { ISessionService } from '../session/session.type.js'
-import { comparePassword } from '../../utils/password.js'
+import { comparePassword, ComparePasswordFn } from '../../utils/password.js'
 import { IInternalNotificationEmitter } from '../../core/notification.emitter.js'
 import { generateActivationCode, hashToken } from '../../utils/token.js'
 import { IAuthCode, IAuthCodeRepository } from '../authCode/authCode.type.js'
 
-@injectable()
+@singleton()
 export class AuthService implements IAuthService {
     constructor(
         @inject(TOKENS.AUTH_REPOSITORY) private authRepository: IAuthRepository,
@@ -42,7 +42,9 @@ export class AuthService implements IAuthService {
         @inject(TOKENS.NOTIFICATION_EMITTER)
         private notificationEmitter: IInternalNotificationEmitter,
         @inject(TOKENS.AUTHCODE_REPOSITORY)
-        private authCodeRepository: IAuthCodeRepository
+        private authCodeRepository: IAuthCodeRepository,
+        @inject(TOKENS.COMPARE_PASSWORD)
+        private comparePassword: ComparePasswordFn
     ) {}
 
     async register(data: IUserProps): Promise<IUserDocument> {
@@ -77,7 +79,7 @@ export class AuthService implements IAuthService {
             throw new UnauthorizedError('User is not activated yet')
         }
 
-        const isValid = await comparePassword(password, user.password)
+        const isValid = await this.comparePassword(password, user.password)
         if (!isValid) {
             throw new UnauthorizedError('Invalid credentials')
         }
