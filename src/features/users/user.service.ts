@@ -3,9 +3,7 @@ import { IUserDocument, IUserProps } from '../auth/interfaces/authInterface'
 import { CreateUserDTO, IUserRepository, IUserService } from './user.type'
 import { UnauthorizedError } from '../../errors/httpErrors'
 import { hashPassword } from '../../utils/password'
-import { createToken, hashToken } from '../../utils/token'
-// import { userActivationHtml } from '../../utils/userActivationHtml'
-// import { userBusinessRepository } from '../userBusiness/userBusiness.repository'
+import { ICryptoService } from '../../utils/token'
 import { IUserBusinessRepository } from '../../unused'
 import { TOKENS } from '../../config/tokens'
 import { injectable, inject } from 'tsyringe'
@@ -19,14 +17,16 @@ export class UserService implements IUserService {
         @inject(TOKENS.USER_BUSINESS_REPOSITORY)
         private userBusinessRepository: IUserBusinessRepository,
         @inject(TOKENS.NOTIFICATION_EMITTER)
-        private notificationEmitter: IInternalNotificationEmitter
+        private notificationEmitter: IInternalNotificationEmitter,
+        @inject(TOKENS.CRYPTO_SERVICE)
+        private crytoService: ICryptoService
     ) {}
 
     createUser = async (
         userData: CreateUserDTO,
         createdBy: string
     ): Promise<IUserDocument> => {
-        const token = createToken()
+        const token = this.crytoService.createToken()
         const session = await mongoose.startSession()
         let status: 'active' | 'pending'
 
@@ -46,7 +46,10 @@ export class UserService implements IUserService {
             const createEmployee = await session.withTransaction(async () => {
                 const { user, newUser } =
                     await this.repository.createUserWithSession(
-                        { ...userData, activationToken: hashToken(token) },
+                        {
+                            ...userData,
+                            activationToken: this.crytoService.hashToken(token),
+                        },
                         session
                     )
 
@@ -102,8 +105,7 @@ export class UserService implements IUserService {
         const session = await mongoose.startSession()
         session.startTransaction()
         try {
-            const hashedToken = hashToken(token)
-            console.log(hashToken)
+            const hashedToken = this.crytoService.hashToken(token)
 
             const updatedUser =
                 await this.repository.findAndUpdateByTokenWithSession(

@@ -11,7 +11,7 @@ import {
     Payload,
     IUserProps,
 } from './interfaces/authInterface.js'
-import { generateToken, signIn } from '../../utils/jwtService.js'
+import { GenerateTokenType, SignInType } from '../../utils/jwtService.js'
 import {
     LoginFirstResponse,
     LoginWithSelectBusinessDTO,
@@ -21,15 +21,14 @@ import {
 } from './types/LoginResponse.type.js'
 import {
     IUserBusinessDocument,
-    IUserBusinessProps,
     IUserBusinessRepository,
 } from '../userBusiness/interfaces/userBusiness.interface.js'
 import { inject, singleton } from 'tsyringe'
 import { TOKENS } from '../../config/tokens.js'
 import { ISessionService } from '../session/session.type.js'
-import { comparePassword, ComparePasswordFn } from '../../utils/password.js'
+import { ComparePasswordFn } from '../../utils/password.js'
 import { IInternalNotificationEmitter } from '../../core/notification.emitter.js'
-import { generateActivationCode, hashToken } from '../../utils/token.js'
+import { ICryptoService } from '../../utils/token.js'
 import { IAuthCode, IAuthCodeRepository } from '../authCode/authCode.type.js'
 
 @singleton()
@@ -44,7 +43,13 @@ export class AuthService implements IAuthService {
         @inject(TOKENS.AUTHCODE_REPOSITORY)
         private authCodeRepository: IAuthCodeRepository,
         @inject(TOKENS.COMPARE_PASSWORD)
-        private comparePassword: ComparePasswordFn
+        private comparePassword: ComparePasswordFn,
+        @inject(TOKENS.JWT_SIGN_IN)
+        private jwtSignIn: SignInType,
+        @inject(TOKENS.GENERATE_TOKEN)
+        private generateToken: GenerateTokenType,
+        @inject(TOKENS.CRYPTO_SERVICE)
+        private cryptoService: ICryptoService
     ) {}
 
     async register(data: IUserProps): Promise<IUserDocument> {
@@ -116,7 +121,7 @@ export class AuthService implements IAuthService {
             type: 'preAuth',
         }
 
-        const token = await signIn(preAuthData)
+        const token = await this.jwtSignIn(preAuthData)
 
         return {
             email: user.email,
@@ -150,7 +155,7 @@ export class AuthService implements IAuthService {
             type: 'access',
         }
 
-        const token = await generateToken(payload)
+        const token = await this.generateToken(payload)
         await this.session.createSession(token, payload)
 
         return {
@@ -164,9 +169,9 @@ export class AuthService implements IAuthService {
         return true
     }
 
-    async adminLogin(user: IUserDocument) {
-        const accessCode = generateActivationCode()
-        const hashedToken = hashToken(accessCode)
+    async adminLogin(user: IUserDocument): Promise<string | null> {
+        const accessCode = this.cryptoService.generateActivationCode()
+        const hashedToken = this.cryptoService.hashToken(accessCode)
 
         const authCodeData: IAuthCode = {
             email: user.email,
@@ -182,7 +187,7 @@ export class AuthService implements IAuthService {
             message: `Enter this access${accessCode} code  to authorize fully`,
         }
         this.notificationEmitter.notify(emailData)
-        return accessCode
+        return null
     }
 
     async adminVerifyToken(email: string, otp: string): Promise<string> {
@@ -192,7 +197,7 @@ export class AuthService implements IAuthService {
             throw new Error('Invalid access code or it has expired')
         }
 
-        const isMatch = comparePassword(otp, authRecord.code)
+        const isMatch = await this.comparePassword(otp, authRecord.code)
 
         if (!isMatch) {
             throw new Error('Invalid access code')
@@ -206,7 +211,7 @@ export class AuthService implements IAuthService {
             type: 'access',
         }
 
-        const token = await generateToken(adminData)
+        const token = await this.generateToken(adminData)
         return token
     }
 

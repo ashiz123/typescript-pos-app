@@ -2,7 +2,7 @@ import mongoose, { UpdateQuery } from 'mongoose'
 import { IBusinessRepository, IBusinessService } from './business.type'
 import { BusinessProps, CreateBusinessDTO } from './business.model'
 import { IUserBusinessRepository } from '../userBusiness/interfaces/userBusiness.interface'
-import { createToken, hashToken } from '../../utils/token'
+import { ICryptoService } from '../../utils/token'
 import { IBusinessDocument } from './database/business_db_model'
 import { IUserRepository } from '../users/user.type'
 import { inject, injectable } from 'tsyringe'
@@ -23,7 +23,9 @@ export class BusinessService implements IBusinessService<BusinessProps> {
         @inject(TOKENS.USER_REPOSITORY)
         private readonly userRepository: IUserRepository,
         @inject(TOKENS.USER_BUSINESS_REPOSITORY)
-        private readonly userBusinessRepo: IUserBusinessRepository
+        private readonly userBusinessRepo: IUserBusinessRepository,
+        @inject(TOKENS.CRYPTO_SERVICE)
+        private readonly cryptoService: ICryptoService
     ) {}
 
     async getById(id: string): Promise<BusinessProps | null> {
@@ -40,7 +42,7 @@ export class BusinessService implements IBusinessService<BusinessProps> {
             email: string
         }
     ): Promise<IBusinessDocument> {
-        const token = createToken()
+        const token = this.cryptoService.createToken()
         const session = await mongoose.startSession()
 
         const admin = await this.userRepository.getAdmin()
@@ -55,7 +57,11 @@ export class BusinessService implements IBusinessService<BusinessProps> {
                 // Create business inside transaction
                 const createdBusiness =
                     await this.businessRepo.createWithSession(
-                        { ...data, activationToken: hashToken(token) },
+                        {
+                            ...data,
+                            activationToken:
+                                this.cryptoService.hashToken(token),
+                        },
                         session
                     )
 
@@ -116,7 +122,7 @@ export class BusinessService implements IBusinessService<BusinessProps> {
             let activated = false
 
             await session.withTransaction(async () => {
-                const hashedToken = hashToken(token)
+                const hashedToken = this.cryptoService.hashToken(token)
                 console.log('topek', token)
                 console.log('hashtoken', hashedToken)
 
