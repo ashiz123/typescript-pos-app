@@ -43,13 +43,14 @@ export class BusinessService implements IBusinessService<BusinessProps> {
         }
     ): Promise<IBusinessDocument> {
         const token = this.cryptoService.createToken()
-        const session = await mongoose.startSession()
 
         const admin = await this.userRepository.getAdmin()
 
         if (!admin) {
             throw new Error('Admin not found to create the business')
         }
+
+        const session = await mongoose.startSession()
 
         try {
             // Use withTransaction to handle rollback + retries

@@ -22,17 +22,13 @@ import { GenerateTokenType, SignInType } from '../../src/utils/jwtService'
 import {
     IUserBusinessDocument,
     IUserBusinessRepository,
-    UserStatus,
 } from '../../src/features/userBusiness/interfaces/userBusiness.interface'
 import { LoginWithSelectBusinessDTO } from '../../src/features/auth/types/LoginResponse.type'
 import { ISessionService } from '../../src/features/session/session.type'
 import { USER_ROLE } from '../../src/features/auth/user.constant'
-import {
-    IUserDocument,
-    Payload,
-} from '../../src/features/auth/interfaces/authInterface'
+import { Payload } from '../../src/features/auth/interfaces/authInterface'
 import { ICryptoService } from '../../src/utils/token'
-import { Types } from 'mongoose'
+
 import {
     IAuthCodeDocument,
     IAuthCodeRepository,
@@ -78,11 +74,13 @@ const mockUserBusinessData: LoginWithSelectBusinessDTO = {
     businessId: 'biz-123',
 }
 
+const mockAccessCode: string = '123456'
+
 describe('AuthService', () => {
     // 2. Define dependencies inside the describe
     let authService: AuthService
     let mockAuthRepo: any
-    let mockComparePassword: Mock<ComparePasswordFn> //mocked as ComparePasswordFn
+    let mockComparePassword: Mock<ComparePasswordFn>
     let mockJwtSignIn: Mock<SignInType>
     let mockGenerateToken: Mock<GenerateTokenType>
     let mockUserBusinessRepo: {
@@ -111,8 +109,6 @@ describe('AuthService', () => {
         getByEmail: MockInstance<IAuthCodeRepository['getByEmail']>
         delete: MockInstance<IAuthCodeRepository['delete']>
     }
-
-    const mockAccessCode: string = '123456'
 
     beforeEach(() => {
         // 3. Mock everything that needs to run before the function runs
@@ -345,6 +341,7 @@ describe('AuthService', () => {
             }
 
             expect(mockGenerateToken).toHaveBeenCalledWith(adminData)
+            expect(mockAuthCodeRepository.delete).toHaveBeenCalled()
             expect(result).toBe('mocked-jwt-token')
         })
     })
